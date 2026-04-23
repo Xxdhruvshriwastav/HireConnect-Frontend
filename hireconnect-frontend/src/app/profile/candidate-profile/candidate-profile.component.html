@@ -1,0 +1,359 @@
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="material-symbols-outlined">work</span>
+        <span class="logo-text">HireConnect</span>
+      </div>
+      <div class="user-brief">
+        <div class="avatar-box">
+          <img src="/avatar-alex.png" alt="User">
+        </div>
+        <div class="user-meta">
+          <span class="u-name">{{ profileForm.get('fullName')?.value || 'New Candidate' }}</span>
+          <span class="u-role">Candidate</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" class="nav-item">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a class="nav-item active">
+        <span class="material-symbols-outlined">person</span>
+        <span class="nav-text">Portfolio</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="upgrade-card">
+        <p>Pro Plan</p>
+        <span>Get AI insights</span>
+        <button routerLink="/dashboard/manage-subscription">Upgrade</button>
+      </div>
+      <button (click)="logout()" class="btn-logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="nav-text">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-nav">
+      <div class="search-bar">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search jobs..." (keyup)="onGlobalSearch($event)">
+      </div>
+      <div class="nav-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">mail</span></button>
+        <div class="user-toggle" (click)="toggleEdit()">
+          <img src="/avatar-alex.png" alt="User">
+          <span class="material-symbols-outlined">keyboard_arrow_down</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="scroll-container">
+      <section class="hero-section">
+        <div class="hero-banner"></div>
+        <div class="hero-profile">
+          <div class="pic-wrap">
+            <img src="/avatar-alex.png" alt="Profile">
+            <div class="cam-overlay"><span class="material-symbols-outlined">photo_camera</span></div>
+          </div>
+          <div class="hero-text">
+            <div class="hero-header-row">
+              <div class="name-box">
+                <h1>{{ profileForm.get('fullName')?.value || 'Alex Rivera' }}</h1>
+                <div class="badges">
+                  <span class="plan-badge" *ngIf="activePlan">{{ activePlan }}</span>
+                  <span class="hire-badge">Available for hire</span>
+                </div>
+              </div>
+              <div class="hero-actions">
+                <button class="btn-primary-gradient" (click)="toggleEdit()">
+                  <span class="material-symbols-outlined">{{ isEditing ? 'visibility' : 'edit' }}</span>
+                  {{ isEditing ? 'View Portfolio' : 'Edit Profile' }}
+                </button>
+                <button class="btn-icon-outline"><span class="material-symbols-outlined">share</span></button>
+              </div>
+            </div>
+            <p class="role-desc">
+              <span class="material-symbols-outlined">location_on</span> 
+              {{ profileForm.get('experience')?.value || 'Experience not set' }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- View Mode -->
+      <div class="profile-grid" *ngIf="!isEditing">
+        <div class="grid-left">
+          <div class="profile-card" *ngIf="profileForm.get('summary')?.value">
+            <div class="card-title">
+              <span class="material-symbols-outlined">article</span>
+              <h3>Professional Summary</h3>
+            </div>
+            <p class="summary-p">
+              {{ profileForm.get('summary')?.value }}
+            </p>
+          </div>
+
+          <div class="profile-card">
+            <div class="card-title">
+              <span class="material-symbols-outlined">work</span>
+              <h3>Work Experience</h3>
+            </div>
+            <div class="list-wrapper" *ngIf="hasWorkExperience(); else noExp">
+              <div class="list-item" *ngFor="let exp of workExperience.controls">
+                <ng-container *ngIf="exp.get('title')?.value || exp.get('company')?.value">
+                  <div class="item-icon-box"><span class="material-symbols-outlined">corporate_fare</span></div>
+                  <div class="item-body">
+                    <h4 *ngIf="exp.get('title')?.value">{{ exp.get('title')?.value }}</h4>
+                    <p class="sub-1" *ngIf="exp.get('company')?.value">{{ exp.get('company')?.value }}</p>
+                    <p class="sub-2" *ngIf="exp.get('period')?.value">{{ exp.get('period')?.value }}</p>
+                    <p class="item-desc" *ngIf="exp.get('description')?.value">{{ exp.get('description')?.value }}</p>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            <ng-template #noExp>
+              <div class="empty-placeholder">
+                <span class="material-symbols-outlined">work_off</span>
+                <p>No work experience added yet.</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="profile-card">
+            <div class="card-title">
+              <span class="material-symbols-outlined">school</span>
+              <h3>Education</h3>
+            </div>
+            <div class="list-wrapper" *ngIf="hasEducation(); else noEdu">
+              <div class="list-item" *ngFor="let edu of education.controls">
+                <ng-container *ngIf="edu.get('degree')?.value || edu.get('school')?.value">
+                  <div class="item-icon-box"><span class="material-symbols-outlined">school</span></div>
+                  <div class="item-body">
+                    <h4 *ngIf="edu.get('degree')?.value">{{ edu.get('degree')?.value }}</h4>
+                    <p class="sub-1" *ngIf="edu.get('school')?.value">{{ edu.get('school')?.value }}</p>
+                    <p class="sub-2" *ngIf="edu.get('period')?.value">{{ edu.get('period')?.value }}</p>
+                    <span class="honor-tag" *ngIf="edu.get('honor')?.value">{{ edu.get('honor')?.value }}</span>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+            <ng-template #noEdu>
+              <div class="empty-placeholder">
+                <span class="material-symbols-outlined">history_edu</span>
+                <p>No education history listed.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="grid-right">
+          <div class="profile-card">
+            <div class="card-title">
+              <span class="material-symbols-outlined">bolt</span>
+              <h3>Core Competencies</h3>
+            </div>
+            <div class="tags-row">
+              <span class="skill-pill" *ngFor="let skill of skills.controls">{{ skill.value }}</span>
+              <div *ngIf="skills.length === 0" class="empty-placeholder">No skills added.</div>
+            </div>
+          </div>
+
+          <div class="profile-card">
+            <div class="card-title space-between">
+              <div class="t-inner"><span class="material-symbols-outlined">description</span><h3>Resume Preview</h3></div>
+              <button class="small-icon-btn"><span class="material-symbols-outlined">open_in_full</span></button>
+            </div>
+            <div class="preview-box">
+              <div class="line-skeleton"></div>
+              <div class="line-skeleton short"></div>
+              <div class="box-skeleton"></div>
+              <p>Preview not available</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div class="edit-view" *ngIf="isEditing">
+        <div class="alert-box" *ngIf="successMessage" [class.error]="successMessage.includes('❌')">
+          <span class="material-symbols-outlined">{{ successMessage.includes('❌') ? 'error' : 'check_circle' }}</span>
+          {{ successMessage }}
+        </div>
+        
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+          <!-- Section: Basic Details -->
+          <div class="edit-card">
+            <div class="e-header">
+              <span class="material-symbols-outlined">person</span>
+              <h3>Basic Details</h3>
+            </div>
+            <div class="input-grid">
+              <div class="field">
+                <label>Full Name *</label>
+                <input type="text" formControlName="fullName" placeholder="e.g. Ashish Kumar" [class.invalid]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                <span class="error-text" *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">Full name is required</span>
+              </div>
+              <div class="field">
+                <label>Mobile Number</label>
+                <input type="text" formControlName="mobile" placeholder="+91 0000000000">
+              </div>
+              <div class="field">
+                <label>Years of Experience</label>
+                <input type="text" formControlName="experience" placeholder="e.g. 5 Years">
+              </div>
+              <div class="field">
+                <label>Resume (PDF/DOC) *</label>
+                <div class="upload-controls">
+                  <input type="text" formControlName="resumeUrl" placeholder="Upload or paste link" [class.invalid]="profileForm.get('resumeUrl')?.invalid && profileForm.get('resumeUrl')?.touched">
+                  <button type="button" class="btn-upload" (click)="resumeInput.click()" [disabled]="isUploading">
+                    <span class="material-symbols-outlined">{{ isUploading ? 'sync' : 'upload_file' }}</span>
+                    <span>{{ isUploading ? '...' : 'Choose' }}</span>
+                  </button>
+                  <input #resumeInput type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" style="display: none;">
+                </div>
+                <span class="error-text" *ngIf="profileForm.get('resumeUrl')?.invalid && profileForm.get('resumeUrl')?.touched">Resume link is required</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Summary -->
+          <div class="edit-card">
+            <div class="e-header">
+              <span class="material-symbols-outlined">description</span>
+              <h3>Professional Summary</h3>
+            </div>
+            <textarea formControlName="summary" placeholder="Tell recruiters about your professional journey, key achievements, and career goals..."></textarea>
+          </div>
+
+          <!-- Section: Skills -->
+          <div class="edit-card">
+            <div class="e-header flex-between">
+              <div class="t-inner">
+                <span class="material-symbols-outlined">bolt</span>
+                <h3>Core Competencies</h3>
+              </div>
+              <button type="button" class="btn-add-item" (click)="addSkill()" title="Add Skill">
+                <span class="material-symbols-outlined">add</span>
+              </button>
+            </div>
+            <div class="skills-edit-list">
+              <div *ngFor="let skill of skills.controls; let i=index" class="skill-input-row">
+                <input type="text" [formControlName]="i" placeholder="Enter skill (e.g. Angular)">
+                <button type="button" class="btn-remove-small" (click)="removeSkill(i)">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div *ngIf="skills.length === 0" class="empty-placeholder">
+                <span class="material-symbols-outlined">extension_off</span>
+                <p>No skills added yet.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Work Experience -->
+          <div class="edit-card">
+            <div class="e-header flex-between">
+              <div class="t-inner">
+                <span class="material-symbols-outlined">work</span>
+                <h3>Work Experience</h3>
+              </div>
+              <button type="button" class="btn-add-item" (click)="addWorkExperience()" title="Add Experience">
+                <span class="material-symbols-outlined">add</span>
+              </button>
+            </div>
+            <div formArrayName="workExperience" class="array-container">
+              <div *ngFor="let exp of workExperience.controls; let i=index" [formGroupName]="i" class="array-item-box">
+                <div class="input-grid">
+                  <div class="field">
+                    <label>Job Title</label>
+                    <input type="text" formControlName="title" placeholder="e.g. Senior Developer">
+                  </div>
+                  <div class="field">
+                    <label>Company</label>
+                    <input type="text" formControlName="company" placeholder="e.g. Google">
+                  </div>
+                  <div class="field">
+                    <label>Period</label>
+                    <input type="text" formControlName="period" placeholder="e.g. 2021 - Present">
+                  </div>
+                  <div class="field full">
+                    <label>Responsibilities & Achievements</label>
+                    <input type="text" formControlName="description" placeholder="Short summary of your role...">
+                  </div>
+                </div>
+                <button type="button" class="btn-remove" (click)="removeWorkExperience(i)" title="Remove">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+              <div *ngIf="workExperience.length === 0" class="empty-placeholder">
+                <span class="material-symbols-outlined">history</span>
+                <p>Add your past professional roles here.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Education -->
+          <div class="edit-card">
+            <div class="e-header flex-between">
+              <div class="t-inner">
+                <span class="material-symbols-outlined">school</span>
+                <h3>Education</h3>
+              </div>
+              <button type="button" class="btn-add-item" (click)="addEducation()" title="Add Education">
+                <span class="material-symbols-outlined">add</span>
+              </button>
+            </div>
+            <div formArrayName="education" class="array-container">
+              <div *ngFor="let edu of education.controls; let i=index" [formGroupName]="i" class="array-item-box">
+                <div class="input-grid">
+                  <div class="field">
+                    <label>Degree / Certificate</label>
+                    <input type="text" formControlName="degree" placeholder="e.g. B.Tech Computer Science">
+                  </div>
+                  <div class="field">
+                    <label>School / University</label>
+                    <input type="text" formControlName="school" placeholder="e.g. IIT Delhi">
+                  </div>
+                  <div class="field">
+                    <label>Period</label>
+                    <input type="text" formControlName="period" placeholder="e.g. 2017 - 2021">
+                  </div>
+                  <div class="field">
+                    <label>Honors / Grade</label>
+                    <input type="text" formControlName="honor" placeholder="e.g. Distinction, 9.2 CGPA">
+                  </div>
+                </div>
+                <button type="button" class="btn-remove" (click)="removeEducation(i)" title="Remove">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+              <div *ngIf="education.length === 0" class="empty-placeholder">
+                <span class="material-symbols-outlined">history_edu</span>
+                <p>List your academic achievements.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-footer-actions">
+            <button type="button" class="btn-cancel-final" (click)="toggleEdit()">Discard Changes</button>
+            <button type="submit" class="btn-save-final" [disabled]="profileForm.invalid || isUploading">
+              {{ isUploading ? 'Please wait...' : 'Save Profile' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

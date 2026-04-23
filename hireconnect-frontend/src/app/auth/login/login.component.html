@@ -1,0 +1,159 @@
+<div class="auth-wrapper">
+  <!-- Left Section: Marketing -->
+  <section class="marketing-pane">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <span class="material-symbols-outlined">work</span>
+      </div>
+      <span>HireConnect</span>
+    </div>
+
+    <h1>Precision in <em>Every</em> Hire.</h1>
+    <p class="subtext">
+      Join the ecosystem where editorial design meets high-performance talent acquisition.
+    </p>
+
+    <div class="hero-img-wrap">
+      <img src="/hero-recruiter.png" alt="Professional Recruiter" class="hero-img">
+    </div>
+
+    <div class="trust-badge">
+      <div class="avatars">
+        <img src="https://i.pravatar.cc/150?u=1" alt="User">
+        <img src="https://i.pravatar.cc/150?u=2" alt="User">
+        <img src="https://i.pravatar.cc/150?u=3" alt="User">
+      </div>
+      <p class="badge-text">
+        <span>+12k</span> Trusted by top recruiters worldwide.
+      </p>
+    </div>
+  </section>
+
+  <!-- Right Section: Form -->
+  <section class="form-pane">
+    <div class="tabs">
+      <button 
+        [class.active]="mode === 'login'" 
+        [class.inactive]="mode !== 'login'"
+        (click)="setMode('login')"
+      >Login</button>
+      <button 
+        [class.active]="mode === 'signup'" 
+        [class.inactive]="mode !== 'signup'"
+        (click)="setMode('signup')"
+      >Sign Up</button>
+    </div>
+
+    <!-- Login Mode -->
+    <ng-container *ngIf="mode === 'login'">
+      <header>
+        <h2>Welcome back</h2>
+        <p>Enter your credentials to access your recruiter dashboard.</p>
+      </header>
+
+      <div id="google-signin-btn" style="margin-bottom: 1.5rem; min-height: 40px;"></div>
+
+      <div class="separator">
+        <span>OR LOGIN WITH EMAIL</span>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div class="form-group">
+          <label for="email">Work Email</label>
+          <div class="input-wrap">
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              [(ngModel)]="email" 
+              placeholder="alex@hireconnect.com"
+              required
+            >
+            <span class="icon material-symbols-outlined">alternate_email</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-wrap">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              [(ngModel)]="password" 
+              placeholder="••••••••"
+              required
+            >
+            <span class="icon material-symbols-outlined">visibility_off</span>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading">
+          {{ loading ? 'Processing...' : 'Enter Workspace' }}
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+
+        <div class="guest-access-divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" routerLink="/home" class="guest-btn">
+          <span class="material-symbols-outlined">explore</span>
+          Browse Jobs as Guest
+        </button>
+      </form>
+    </ng-container>
+
+    <!-- Sign Up Mode -->
+    <ng-container *ngIf="mode === 'signup'">
+      <header>
+        <h2>Join HireConnect</h2>
+        <p>Select your account type to get started.</p>
+      </header>
+
+      <div class="signup-options">
+        <a routerLink="/auth/register/candidate" class="option-card">
+          <div class="option-icon candidate">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div class="option-info">
+            <h3>Candidate</h3>
+            <p>Find your dream job and showcase your talent.</p>
+          </div>
+          <span class="material-symbols-outlined arrow">chevron_right</span>
+        </a>
+
+        <a routerLink="/auth/register/recruiter" class="option-card">
+          <div class="option-icon recruiter">
+            <span class="material-symbols-outlined">business_center</span>
+          </div>
+          <div class="option-info">
+            <h3>Recruiter</h3>
+            <p>Hire the world's best professionals for your team.</p>
+          </div>
+          <span class="material-symbols-outlined arrow">chevron_right</span>
+        </a>
+      </div>
+    </ng-container>
+
+    <p class="legal-text">
+      By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+    </p>
+  </section>
+</div>
+
+<footer class="page-footer">
+  <div class="copyright">
+    © 2024 HireConnect Inc. Editorial<br>
+    Precision in Hiring.
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Help Center</a>
+    <a href="#">Contact Us</a>
+  </div>
+</footer>

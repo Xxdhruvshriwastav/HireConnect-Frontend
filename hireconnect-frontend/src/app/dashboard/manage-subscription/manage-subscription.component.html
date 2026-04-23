@@ -1,0 +1,51 @@
+<div class="subscription-container">
+  <h2>Manage Subscription</h2>
+  
+  <div *ngIf="message" class="alert" [ngClass]="{'alert-success': message.includes('Successful'), 'alert-danger': !message.includes('Successful')}">
+    {{ message }}
+  </div>
+
+  <div *ngIf="activeSubscription" class="active-status-banner">
+    <div class="status-info">
+      <span class="label">Current Active Plan:</span>
+      <span class="plan-name">{{ activeSubscription.plan }}</span>
+    </div>
+    <div class="status-info">
+      <span class="label">Valid Until:</span>
+      <span class="expiry-date">{{ activeSubscription.endDate | date:'mediumDate' }}</span>
+    </div>
+  </div>
+
+  <div class="plans-grid">
+    <div *ngFor="let plan of plans" 
+         class="plan-card" 
+         [class.selected]="selectedPlan?.id === plan.id"
+         [class.active-plan]="activeSubscription?.plan === plan.id"
+         (click)="selectPlan(plan)">
+      <div class="current-badge" *ngIf="activeSubscription?.plan === plan.id">CURRENT PLAN</div>
+      <h3>{{ plan.name }}</h3>
+      <div class="price">₹{{ plan.price }} <span class="period" *ngIf="plan.price > 0">/ month</span></div>
+      <ul class="features">
+        <li *ngFor="let feature of plan.features">✓ {{ feature }}</li>
+      </ul>
+      <button class="select-btn">{{ selectedPlan?.id === plan.id ? 'Selected' : 'Select Plan' }}</button>
+    </div>
+  </div>
+
+  <div class="checkout-section" *ngIf="selectedPlan && selectedPlan.price > 0">
+    <h3>Checkout - {{ selectedPlan.name }}</h3>
+    
+    <div class="payment-mode">
+      <label>Select Payment Mode:</label>
+      <select [(ngModel)]="paymentMode">
+        <option value="CARD">Credit / Debit Card</option>
+        <option value="UPI">UPI</option>
+        <option value="WALLET">Wallet</option>
+      </select>
+    </div>
+
+    <button class="pay-btn" (click)="payNow()" [disabled]="isProcessing">
+      {{ isProcessing ? 'Processing...' : 'Pay ₹' + selectedPlan.price }}
+    </button>
+  </div>
+</div>

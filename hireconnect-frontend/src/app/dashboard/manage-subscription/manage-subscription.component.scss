@@ -1,0 +1,232 @@
+.subscription-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+
+  h2 {
+    color: #1a1a1a;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    
+    &-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    &-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  }
+
+  .active-status-banner {
+    display: flex;
+    justify-content: space-around;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    .status-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+
+      .label {
+        font-size: 0.875rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        font-weight: 600;
+      }
+
+      .plan-name {
+        font-size: 1.25rem;
+        color: #1e40af;
+        font-weight: 700;
+      }
+
+      .expiry-date {
+        font-size: 1.125rem;
+        color: #334155;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .plan-card {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-color: #3b82f6;
+    }
+
+    &.selected {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      transform: scale(1.02);
+    }
+
+    &.active-plan {
+      border-color: #10b981;
+      background-color: #f0fdf4;
+    }
+
+    .current-badge {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #10b981;
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 1.5rem;
+
+      .period {
+        font-size: 1rem;
+        color: #6b7280;
+        font-weight: 400;
+      }
+    }
+
+    .features {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+      text-align: left;
+
+      li {
+        margin-bottom: 0.75rem;
+        color: #4b5563;
+        font-size: 0.95rem;
+      }
+    }
+
+    .select-btn {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      background: #f3f4f6;
+      color: #374151;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      .selected & {
+        background: #2563eb;
+        color: white;
+      }
+    }
+  }
+
+  .checkout-section {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+
+    h3 {
+      margin-bottom: 1.5rem;
+      color: #1e293b;
+    }
+
+    .payment-mode {
+      margin-bottom: 1.5rem;
+      text-align: left;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #475569;
+        font-weight: 500;
+      }
+
+      select {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        outline: none;
+        font-size: 1rem;
+
+        &:focus {
+          border-color: #3b82f6;
+        }
+      }
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #10b981;
+      color: white;
+      font-size: 1.125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover:not(:disabled) {
+        background: #059669;
+      }
+
+      &:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

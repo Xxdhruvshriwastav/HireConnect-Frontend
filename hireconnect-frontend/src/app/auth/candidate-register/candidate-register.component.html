@@ -1,0 +1,104 @@
+<div class="auth-wrapper">
+  <!-- Left Section: Marketing -->
+  <section class="marketing-pane">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <span class="material-symbols-outlined">work</span>
+      </div>
+      <span>HireConnect</span>
+    </div>
+
+    <h1>Precision in <em>Every</em> Hire.</h1>
+    <p class="subtext">
+      Join the ecosystem where editorial design meets high-performance talent acquisition.
+    </p>
+
+    <div class="hero-img-wrap">
+      <img src="/hero-candidate.png" alt="Professional Candidate" class="hero-img">
+    </div>
+
+    <div class="trust-badge">
+      <div class="avatars">
+        <img src="https://i.pravatar.cc/150?u=4" alt="User">
+        <img src="https://i.pravatar.cc/150?u=5" alt="User">
+        <img src="https://i.pravatar.cc/150?u=6" alt="User">
+      </div>
+      <p class="badge-text">
+        <span>+12k</span> Trusted by top recruiters worldwide.
+      </p>
+    </div>
+  </section>
+
+  <!-- Right Section: Form -->
+  <section class="form-pane">
+    <div class="tabs">
+      <button type="button" class="inactive" routerLink="/auth/login">Login</button>
+      <button type="button" class="active">Sign Up</button>
+    </div>
+
+    <header>
+      <h2>Create Account</h2>
+      <p>Join HireConnect as a Candidate and find your dream job.</p>
+    </header>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+      <div class="form-group">
+        <label for="email">Work Email</label>
+        <div class="input-wrap">
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            [(ngModel)]="formData.email" 
+            placeholder="alex@hireconnect.com"
+            required
+            email
+            #emailRef="ngModel"
+          >
+          <span class="icon material-symbols-outlined">alternate_email</span>
+        </div>
+        <p class="text-xs text-red-500 mt-2 px-1" *ngIf="emailRef.invalid && emailRef.touched">Valid email is required.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            [(ngModel)]="formData.password" 
+            placeholder="••••••••"
+            required
+            minlength="6"
+            #passRef="ngModel"
+          >
+          <span class="icon material-symbols-outlined">visibility_off</span>
+        </div>
+        <p class="text-xs text-red-500 mt-2 px-1" *ngIf="passRef.invalid && passRef.touched">Minimum 6 characters required.</p>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="registerForm.invalid || loading">
+        {{ loading ? 'Processing...' : 'Create Account' }}
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+    </form>
+
+    <p class="legal-text">
+      By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+    </p>
+  </section>
+</div>
+
+<footer class="page-footer">
+  <div class="copyright">
+    © 2024 HireConnect Inc. Editorial<br>
+    Precision in Hiring.
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Help Center</a>
+    <a href="#">Contact Us</a>
+  </div>
+</footer>
