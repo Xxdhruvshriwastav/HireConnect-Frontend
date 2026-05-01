@@ -1,0 +1,94 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <div class="header-content">
+      <h1>Admin Command Center</h1>
+      <p>Platform Analytics & Ecosystem Health</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="goBack()">
+        <span class="material-symbols-outlined">home</span>
+        Dashboard
+      </button>
+      <button class="btn-refresh" (click)="loadStats()">
+        <span class="material-symbols-outlined">refresh</span>
+        Refresh
+      </button>
+      <button class="btn-logout" (click)="logout()">
+        <span class="material-symbols-outlined">logout</span>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-grid" *ngIf="!isLoading && stats">
+    <div class="stat-card">
+      <div class="stat-icon jobs">
+        <span class="material-symbols-outlined">work</span>
+      </div>
+      <div class="stat-info">
+        <h3>Total Jobs</h3>
+        <p class="value">{{ stats.totalJobs }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon apps">
+        <span class="material-symbols-outlined">description</span>
+      </div>
+      <div class="stat-info">
+        <h3>Applications</h3>
+        <p class="value">{{ stats.totalApplications }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <div class="stat-info">
+        <h3>Hires / Offers</h3>
+        <p class="value">{{ stats.offeredCount }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon timing">
+        <span class="material-symbols-outlined">timer</span>
+      </div>
+      <div class="stat-info">
+        <h3>Avg. Time to Hire</h3>
+        <p class="value">{{ stats.avgTimeToHireDays }} Days</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="detailed-stats" *ngIf="!isLoading && stats">
+    <div class="chart-box">
+      <h3>Application Pipeline</h3>
+      <div class="pipeline-bar">
+        <div class="bar-segment shortlisted" [style.width.%]="(stats.shortlistedCount / stats.totalApplications) * 100">
+          Shortlisted ({{ stats.shortlistedCount }})
+        </div>
+        <div class="bar-segment offered" [style.width.%]="(stats.offeredCount / stats.totalApplications) * 100">
+          Offered ({{ stats.offeredCount }})
+        </div>
+        <div class="bar-segment rejected" [style.width.%]="(stats.rejectedCount / stats.totalApplications) * 100">
+          Rejected ({{ stats.rejectedCount }})
+        </div>
+      </div>
+    </div>
+
+    <div class="ratio-card">
+      <h3>Efficiency Ratio</h3>
+      <div class="ratio-gauge">
+        <div class="gauge-value">{{ (stats.viewToApplyRatio * 100).toFixed(1) }}%</div>
+        <div class="gauge-label">View-to-Apply</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Crunching platform data...</p>
+  </div>
+</div>

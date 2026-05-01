@@ -10,14 +10,15 @@
     <div class="sidebar-content">
       <!-- Logged in user info -->
       <div class="user-identity" *ngIf="role">
-        <div class="avatar-placeholder">
-          {{ (role === 'RECRUITER' ? 'Alex Rivera' : 'New Candidate').charAt(0) }}
+        <div class="avatar-placeholder" *ngIf="!userProfile?.profilePictureUrl">
+          {{ userProfile?.fullName ? userProfile.fullName.charAt(0).toUpperCase() : (userEmail ? userEmail.charAt(0).toUpperCase() : (role === 'RECRUITER' ? 'A' : 'C')) }}
         </div>
+        <img class="avatar-img" *ngIf="userProfile?.profilePictureUrl" [src]="userProfile.profilePictureUrl" alt="Avatar">
         <div class="user-info">
-          <p class="user-name">{{ role === 'RECRUITER' ? 'Alex Rivera' : 'New Candidate' }}</p>
+          <p class="user-name">{{ userProfile?.fullName || (userEmail ? (userEmail.split('@')[0] | titlecase) : (role === 'RECRUITER' ? 'Recruiter' : 'Candidate')) }}</p>
           <div class="role-plan">
-            <p class="user-role">{{ role === 'RECRUITER' ? 'Senior Recruiter' : 'Job Seeker' }}</p>
-            <span class="u-plan-badge" *ngIf="activePlan">{{ activePlan }}</span>
+            <p class="user-role">{{ role === 'RECRUITER' ? 'Recruiter' : 'Job Seeker' }}</p>
+            <span class="u-plan-badge" *ngIf="activePlan" [ngClass]="{'pro': activePlan === 'CANDIDATE_PRO'}">{{ activePlan.replace('_', ' ') }}</span>
           </div>
         </div>
       </div>
@@ -38,21 +39,19 @@
           <span class="material-symbols-outlined">home</span>
           <span class="nav-label">Home</span>
         </a>
-        <a routerLink="/dashboard" class="nav-item" [routerLinkActive]="['active']" *ngIf="role">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="nav-label">Dashboard</span>
-        </a>
-        <a routerLinkActive="active" fragment="jobs-section" class="nav-item">
-          <span class="material-symbols-outlined">{{ role === 'RECRUITER' ? 'description' : 'work' }}</span>
-          <span class="nav-label">{{ role === 'RECRUITER' ? 'Job Posts' : 'Browse Jobs' }}</span>
-        </a>
+
+
         <a (click)="goToProfile()" class="nav-item" *ngIf="role">
           <span class="material-symbols-outlined">account_circle</span>
           <span class="nav-label">My Portfolio</span>
         </a>
-        <a routerLink="/dashboard/manage-subscription" class="nav-item" *ngIf="role">
+        <a routerLink="/dashboard/manage-subscription" class="nav-item" [routerLinkActive]="['active']" *ngIf="role === 'RECRUITER'">
           <span class="material-symbols-outlined">credit_card</span>
           <span class="nav-label">Subscription</span>
+        </a>
+        <a routerLink="/admin/dashboard" class="nav-item" [routerLinkActive]="['active']" *ngIf="role === 'ADMIN'">
+          <span class="material-symbols-outlined">analytics</span>
+          <span class="nav-label">Admin Analytics</span>
         </a>
       </nav>
 
@@ -163,11 +162,6 @@
 
     <!-- Nav + Actions bar -->
     <div class="sub-header">
-      <nav class="top-nav">
-        <a href="#">{{ role === 'RECRUITER' ? 'My Postings' : 'Browse Jobs' }}</a>
-        <a href="#">Companies</a>
-        <a href="#">Salaries</a>
-      </nav>
       <div class="top-actions">
         <!-- Notification Bell (Only for logged in) -->
         <div class="notif-wrapper" *ngIf="role">
@@ -188,7 +182,7 @@
             </div>
             <div class="notif-list">
               <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.isRead" (click)="markAsRead(n.notificationId)">
-                <div class="notif-icon" [ngClass]="n.type?.toLowerCase() || 'info'">
+                <div class="notif-icon" [ngClass]="n.type.toLowerCase() || 'info'">
                   <span class="material-symbols-outlined">
                     {{ n.type === 'EMAIL' ? 'mail' : (n.type === 'ALERT' ? 'warning' : 'info') }}
                   </span>
@@ -197,6 +191,9 @@
                   <p class="notif-message">{{ n.message }}</p>
                   <span class="notif-time">{{ n.createdAt | date:'short' }}</span>
                 </div>
+                <button class="btn-delete-notif" (click)="deleteNotification(n.notificationId, $event)" title="Delete Notification">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
               </div>
               <div class="notif-empty" *ngIf="notifications.length === 0">
                 <span class="material-symbols-outlined">notifications_off</span>
@@ -206,9 +203,7 @@
           </div>
         </div>
 
-        <button class="action-btn" *ngIf="role">
-          <span class="material-symbols-outlined">chat_bubble</span>
-        </button>
+        
         
         <div class="user-mini-profile" (click)="goToProfile()" *ngIf="role">
           <span class="material-symbols-outlined">account_circle</span>
@@ -240,7 +235,12 @@
           <div class="posting-card" *ngFor="let job of filteredMyJobs">
             <div class="card-header">
               <span class="job-type-tag">{{ job.type }}</span>
-              <span class="status-pill" [class.active]="job.status === 'OPEN'">{{ job.status }}</span>
+              <div class="card-actions">
+                <span class="status-pill" [class.active]="job.status === 'OPEN'">{{ job.status }}</span>
+                <button class="btn-icon-delete" (click)="deleteJob(job.jobId)" title="Delete Job">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
             </div>
             <h3 class="job-title">{{ job.title }}</h3>
             <p class="job-loc">{{ job.location }}</p>
@@ -267,12 +267,48 @@
          <p>Showing applications for <strong>Job ID: #{{ selectedJobId }}</strong></p>
       </div>
 
-      <!-- Stats Grid (Dynamic for selected job) -->
-      <section class="stats-grid" *ngIf="selectedJobId">
-        <div class="stat-card">
-          <p class="stat-label">Total Applicants</p>
-          <div class="stat-value-row">
-            <span class="stat-value">{{ selectedJobApplications.length }}</span>
+      <!-- 📊 RECRUITER ANALYTICS SECTION (NEW) -->
+      <section class="recruiter-analytics-section" *ngIf="role === 'RECRUITER' && displayStats">
+        <div class="section-header">
+          <h2>Hiring Performance</h2>
+          <span class="update-tag">Real-time Metrics</span>
+        </div>
+        <div class="analytics-cards">
+          <div class="a-card">
+            <div class="a-icon">
+              <span class="material-symbols-outlined">group</span>
+            </div>
+            <div class="a-data">
+              <span class="a-label">Total Applications</span>
+              <span class="a-value">{{ displayStats.totalApplications }}</span>
+            </div>
+          </div>
+          <div class="a-card">
+            <div class="a-icon success">
+              <span class="material-symbols-outlined">verified</span>
+            </div>
+            <div class="a-data">
+              <span class="a-label">Shortlisted</span>
+              <span class="a-value">{{ displayStats.shortlistedCount }}</span>
+            </div>
+          </div>
+          <div class="a-card">
+            <div class="a-icon ratio">
+              <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <div class="a-data">
+              <span class="a-label">Apply Ratio</span>
+              <span class="a-value">{{ (displayStats.viewToApplyRatio * 100).toFixed(1) }}%</span>
+            </div>
+          </div>
+          <div class="a-card">
+            <div class="a-icon time">
+              <span class="material-symbols-outlined">avg_time</span>
+            </div>
+            <div class="a-data">
+              <span class="a-label">Avg. Hire Time</span>
+              <span class="a-value">{{ displayStats.avgTimeToHireDays | number:'1.1-1' }}d</span>
+            </div>
           </div>
         </div>
       </section>
@@ -293,7 +329,7 @@
           <div class="interview-box" *ngFor="let entry of recruiterInterviews | keyvalue" style="margin: 0; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             <div class="interview-header" style="display: flex; justify-content: space-between;">
               <strong>App ID: {{ entry.value.applicationId }}</strong>
-              <span class="status-pill" [ngClass]="entry.value.status?.toLowerCase()" style="font-size: 0.65rem;">{{ entry.value.status }}</span>
+              <span class="status-pill" [ngClass]="entry.value.status?.toLowerCase() || ''" style="font-size: 0.65rem;">{{ entry.value.status }}</span>
             </div>
             <div class="interview-info">
               <span><span class="material-symbols-outlined">calendar_today</span> {{ entry.value.scheduledAt | date:'medium' }}</span>
@@ -331,13 +367,24 @@
                   <h3>{{ app.candidateEmail }}</h3>
                   <p class="title">Status: {{ app.status }}</p>
                   <div class="meta-info">
-                    <span><span class="material-symbols-outlined">description</span> {{ app.resumeUrl ? 'Resume Provided' : 'No Resume' }}</span>
+                    <span *ngIf="app.resumeUrl">
+                      <a [href]="app.resumeUrl" target="_blank" class="resume-link">
+                        <span class="material-symbols-outlined">download</span> View Resume
+                      </a>
+                    </span>
+                    <span *ngIf="!app.resumeUrl" class="no-resume">
+                      <span class="material-symbols-outlined">description</span> No Resume
+                    </span>
+                  </div>
+                  <div class="cover-letter-box" *ngIf="app.coverLetter">
+                    <h4>Cover Letter</h4>
+                    <p>{{ app.coverLetter }}</p>
                   </div>
                 </div>
               </div>
               <div class="card-right">
                 <div class="pipeline-status">
-                  <span class="status-pill" [ngClass]="app.status?.toLowerCase()">{{ app.status }}</span>
+                  <span class="status-pill" [ngClass]="app.status?.toLowerCase() || ''">{{ app.status }}</span>
                   <span class="applied-time">Applied {{ app.appliedAt | date:'shortDate' }}</span>
                 </div>
 
@@ -375,7 +422,7 @@
                 <div class="form-row">
                   <div class="input-group">
                     <label>Date & Time</label>
-                    <input type="datetime-local" formControlName="scheduledAt">
+                    <input type="datetime-local" formControlName="scheduledAt" [min]="currentDateTime">
                   </div>
                   <div class="input-group">
                     <label>Mode</label>
@@ -402,6 +449,33 @@
           <p>No applicants for this job yet.</p>
         </div>
       </section>
+      
+      <!-- Profile Completion for Recruiters -->
+      <section class="profile-completion-section" *ngIf="role === 'RECRUITER' && !isProfileFullyComplete">
+        <h2>Complete Your Company Profile</h2>
+        <p class="section-sub">A complete company profile attracts <strong>3x more quality candidates</strong></p>
+        <div class="completion-grid">
+          <div class="completion-item" [class.done]="isBasicInfoComplete" [class.pending]="!isBasicInfoComplete">
+            <span class="material-symbols-outlined">{{ isBasicInfoComplete ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>Company Name</span>
+          </div>
+          <div class="completion-item" [class.done]="isWorkExperienceComplete" [class.pending]="!isWorkExperienceComplete">
+            <span class="material-symbols-outlined">{{ isWorkExperienceComplete ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>Industry & Type</span>
+          </div>
+          <div class="completion-item" [class.done]="isResumeUploaded" [class.pending]="!isResumeUploaded">
+            <span class="material-symbols-outlined">{{ isResumeUploaded ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>Company Website</span>
+          </div>
+          <div class="completion-item" [class.done]="isSkillsAdded" [class.pending]="!isSkillsAdded">
+            <span class="material-symbols-outlined">{{ isSkillsAdded ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>Company Summary</span>
+          </div>
+        </div>
+        <button class="btn-complete-profile" (click)="goToProfile()">
+          Update Company Profile <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </section>
     </div>
 
     <!-- ═══════ CANDIDATE & GUEST DASHBOARD ═══════ -->
@@ -410,22 +484,22 @@
       <!-- Welcome Banner -->
       <section class="candidate-welcome">
         <div class="welcome-text">
-          <p class="welcome-sub">{{ role ? 'Good morning 👋' : 'Find your next career move 👋' }}</p>
+          <p class="welcome-sub">{{ role ? greeting + ' 👋' : 'Find your next career move 👋' }}</p>
           <h1>{{ role ? 'Find Your Dream Job' : 'Explore 1000+ Opportunities' }}</h1>
-          <p class="welcome-desc" *ngIf="role">You have <strong>3 active applications</strong> and <strong>12 new job matches</strong> waiting for you.</p>
+          <p class="welcome-desc" *ngIf="role">You have <strong>{{ myApplications.length }} active applications</strong> and <strong>{{ filteredJobs.length }} new job matches</strong> waiting for you.</p>
           <p class="welcome-desc" *ngIf="!role">Join HireConnect to unlock personalized recommendations and direct applications.</p>
         </div>
         <div class="welcome-stats" *ngIf="role">
           <div class="w-stat">
-            <span class="w-stat-value">3</span>
+            <span class="w-stat-value">{{ myApplications.length }}</span>
             <span class="w-stat-label">Active Applications</span>
           </div>
           <div class="w-stat">
-            <span class="w-stat-value">12</span>
+            <span class="w-stat-value">{{ filteredJobs.length }}</span>
             <span class="w-stat-label">New Matches</span>
           </div>
           <div class="w-stat">
-            <span class="w-stat-value">85%</span>
+            <span class="w-stat-value">{{ profileStrength }}%</span>
             <span class="w-stat-label">Profile Strength</span>
           </div>
         </div>
@@ -441,10 +515,10 @@
           <a href="#" class="view-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
         </div>
         <div class="pipeline-cards">
-          <div class="pipeline-card" *ngFor="let app of myApplications" [ngClass]="'status-' + app.status?.toLowerCase()">
+          <div class="pipeline-card" *ngFor="let app of myApplications" [ngClass]="'status-' + (app.status?.toLowerCase() || 'default')">
             <div class="pcard-header">
               <div class="company-logo hireconnect">H</div>
-              <span class="app-status-pill" [ngClass]="app.status?.toLowerCase()">{{ app.status }}</span>
+              <span class="app-status-pill" [ngClass]="app.status?.toLowerCase() || ''">{{ app.status }}</span>
             </div>
             <h3>Job ID: {{ app.jobId }}</h3>
             <p class="company-name">Applied on {{ app.appliedAt | date:'mediumDate' }}</p>
@@ -474,6 +548,9 @@
               </div>
               <span class="progress-label">{{ app.status }}</span>
             </div>
+            <div class="pcard-actions">
+              <button class="btn-withdraw" (click)="withdrawApplication(app.applicationId)">Withdraw Application</button>
+            </div>
           </div>
         </div>
       </section>
@@ -490,23 +567,28 @@
         </div>
         
         <div class="job-list" *ngIf="filteredJobs.length > 0">
-          <div class="job-row" *ngFor="let job of filteredJobs">
-            <div class="job-row-left">
+          <div class="job-card" *ngFor="let job of displayedJobs">
+            <div class="card-top">
               <div class="company-logo-circle">{{ job.title.charAt(0) }}</div>
-              <div class="job-row-info">
-                <h3>{{ job.title }}</h3>
-                <p>{{ job.location }} · {{ job.type }}</p>
-                <div class="job-tags">
-                  <span class="tag" *ngFor="let skill of job.skills | slice:0:3">{{ skill }}</span>
-                </div>
+              <span class="match-score" *ngIf="role">Match Found</span>
+            </div>
+            <div class="card-body">
+              <h3>{{ job.title }}</h3>
+              <p class="company-name">{{ job.company || 'HireConnect Partner' }} <span *ngIf="job.postedBy" style="color: #64748b; font-weight: 500;">· By: {{ job.postedBy }}</span></p>
+              <p class="job-meta">{{ job.location }} · {{ job.type }}</p>
+              <div class="job-tags">
+                <span class="tag" *ngFor="let skill of job.skills | slice:0:3">{{ skill }}</span>
               </div>
             </div>
-            <div class="job-row-right">
-              <span class="match-score" *ngIf="role">Match Found</span>
+            <div class="card-footer">
               <span class="salary">{{ job.salaryMin | currency:'INR':'symbol':'1.0-0' }} – {{ job.salaryMax | currency:'INR':'symbol':'1.0-0' }}</span>
-              <button class="btn-apply" (click)="applyForJob(job)">{{ role ? 'Apply Now' : 'Sign in to Apply' }}</button>
+              <button class="btn-apply" (click)="applyForJob(job)">{{ role ? 'Apply Now' : 'Sign in' }}</button>
             </div>
           </div>
+        </div>
+
+        <div class="load-more-container" *ngIf="visibleJobsCount < filteredJobs.length">
+          <button class="btn-outline" (click)="loadMoreJobs()">Load More Jobs</button>
         </div>
 
         <div class="empty-state-small" *ngIf="jobs.length === 0 && !isLoading">
@@ -515,29 +597,25 @@
       </section>
 
       <!-- Profile Completion (Logged in only) -->
-      <section class="profile-completion-section" *ngIf="role === 'CANDIDATE'">
+      <section class="profile-completion-section" *ngIf="role === 'CANDIDATE' && !isProfileFullyComplete">
         <h2>Complete Your Profile</h2>
         <p class="section-sub">A complete profile gets <strong>4x more views</strong> from recruiters</p>
         <div class="completion-grid">
-          <div class="completion-item done">
-            <span class="material-symbols-outlined">check_circle</span>
+          <div class="completion-item" [class.done]="isBasicInfoComplete" [class.pending]="!isBasicInfoComplete">
+            <span class="material-symbols-outlined">{{ isBasicInfoComplete ? 'check_circle' : 'radio_button_unchecked' }}</span>
             <span>Basic Info</span>
           </div>
-          <div class="completion-item done">
-            <span class="material-symbols-outlined">check_circle</span>
+          <div class="completion-item" [class.done]="isWorkExperienceComplete" [class.pending]="!isWorkExperienceComplete">
+            <span class="material-symbols-outlined">{{ isWorkExperienceComplete ? 'check_circle' : 'radio_button_unchecked' }}</span>
             <span>Work Experience</span>
           </div>
-          <div class="completion-item pending">
-            <span class="material-symbols-outlined">radio_button_unchecked</span>
+          <div class="completion-item" [class.done]="isResumeUploaded" [class.pending]="!isResumeUploaded">
+            <span class="material-symbols-outlined">{{ isResumeUploaded ? 'check_circle' : 'radio_button_unchecked' }}</span>
             <span>Upload Resume</span>
           </div>
-          <div class="completion-item pending">
-            <span class="material-symbols-outlined">radio_button_unchecked</span>
-            <span>Portfolio Link</span>
-          </div>
-          <div class="completion-item pending">
-            <span class="material-symbols-outlined">radio_button_unchecked</span>
-            <span>Skills Assessment</span>
+          <div class="completion-item" [class.done]="isSkillsAdded" [class.pending]="!isSkillsAdded">
+            <span class="material-symbols-outlined">{{ isSkillsAdded ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span>Skills & Tags</span>
           </div>
         </div>
         <button class="btn-complete-profile" (click)="goToProfile()">
@@ -562,6 +640,18 @@
         </div>
       </section>
 
+    </div>
+    
+    <!-- ═══════ ADMIN FALLBACK DASHBOARD ═══════ -->
+    <div class="page-content admin-fallback" *ngIf="role === 'ADMIN'">
+      <div class="welcome-banner">
+        <h1>Welcome, Platform Admin</h1>
+        <p>You are currently on the standard dashboard. Switch to the Analytics view for full control.</p>
+        <button class="btn-primary" routerLink="/admin/dashboard">
+          <span class="material-symbols-outlined">analytics</span>
+          Open Admin Analytics
+        </button>
+      </div>
     </div>
 
     <!-- Footer -->

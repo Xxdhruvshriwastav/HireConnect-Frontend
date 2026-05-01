@@ -29,6 +29,7 @@ export class PostJobComponent implements OnInit {
     
     this.jobForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
+      description: ['', [Validators.required, Validators.minLength(20)]],
       category: ['', Validators.required],
       type: ['Full-time', Validators.required],
       location: ['', Validators.required],
@@ -56,10 +57,22 @@ export class PostJobComponent implements OnInit {
   onSubmit() {
     if (this.jobForm.valid) {
       this.isSubmitting = true;
+      const formValue = this.jobForm.value;
       const jobData = {
-        ...this.jobForm.value,
-        skills: this.jobForm.value.skills.filter((s: string) => s.trim() !== '')
+        title: formValue.title,
+        description: formValue.description,
+        category: formValue.category,
+        location: formValue.location,
+        type: formValue.type,
+        experienceRequired: formValue.experienceRequired,
+        salaryMin: Number(formValue.salaryMin) || 0,
+        salaryMax: Number(formValue.salaryMax) || 0,
+        skills: formValue.skills ? formValue.skills.filter((s: string) => s && s.trim() !== '') : [],
+        postedBy: this.authService.getCurrentUserEmail() ?? '',
+        status: 'OPEN' as const
       };
+
+      console.log('Sending Job Data:', jobData);
 
       this.jobService.postJob(jobData).subscribe({
         next: (res) => {

@@ -8,7 +8,7 @@
       </div>
       <div class="user-brief">
         <div class="avatar-box">
-          <img src="/avatar-recruiter.png" alt="User">
+          <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-recruiter.png'" alt="User">
         </div>
         <div class="user-meta">
           <span class="u-name">{{ profileForm.get('fullName')?.value || 'Recruiter' }}</span>
@@ -48,7 +48,7 @@
         <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
         <button class="icon-btn"><span class="material-symbols-outlined">mail</span></button>
         <div class="user-toggle" (click)="toggleEdit()">
-          <img src="/avatar-recruiter.png" alt="User">
+          <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-recruiter.png'" alt="User">
           <span class="material-symbols-outlined">keyboard_arrow_down</span>
         </div>
       </div>
@@ -56,37 +56,68 @@
 
     <div class="scroll-container">
       <section class="hero-section">
-        <div class="hero-banner recruiter-banner"></div>
+        <div class="hero-banner recruiter-banner">
+          <img *ngIf="profileForm.get('coverPictureUrl')?.value" [src]="profileForm.get('coverPictureUrl')?.value" alt="Cover Picture" class="cover-img">
+          <div class="cam-overlay cover-cam" *ngIf="isEditing" (click)="coverInput.click()">
+            <span class="material-symbols-outlined">{{ isCoverUploading ? 'sync' : 'add_photo_alternate' }}</span>
+          </div>
+          <input #coverInput type="file" (change)="onCoverPicSelected($event)" accept="image/*" style="display: none;">
+        </div>
         <div class="hero-profile">
-          <div class="pic-wrap">
-            <div class="company-logo-large">
+          <div class="pic-wrap" (click)="isEditing ? picInput.click() : null" [style.cursor]="isEditing ? 'pointer' : 'default'">
+            <img *ngIf="profileForm.get('profilePictureUrl')?.value" [src]="profileForm.get('profilePictureUrl')?.value" alt="Profile" [class.uploading]="isPicUploading">
+            <div class="company-logo-large" *ngIf="!profileForm.get('profilePictureUrl')?.value">
               <span class="material-symbols-outlined">corporate_fare</span>
             </div>
-            <div class="cam-overlay"><span class="material-symbols-outlined">photo_camera</span></div>
+            <div class="cam-overlay" *ngIf="isEditing">
+              <span class="material-symbols-outlined">{{ isPicUploading ? 'sync' : 'photo_camera' }}</span>
+            </div>
+            <input #picInput type="file" (change)="onProfilePicSelected($event)" accept="image/*" style="display: none;">
           </div>
           <div class="hero-text">
             <div class="hero-header-row">
-              <div class="name-box">
-                <h1>{{ profileForm.get('companyName')?.value || 'Your Company' }}</h1>
-                <div class="badges">
+              <div class="company-info-block">
+                <h1 class="company-title">
+                  {{ profileForm.get('companyName')?.value || 'Your Company' }}
+                  <span class="material-symbols-outlined verified-icon" title="Verified Company">verified</span>
+                </h1>
+                
+                <div class="company-meta-row">
+                  <span class="meta-item">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ profileForm.get('industry')?.value || 'IT Services & Consulting' }}
+                  </span>
+                  <span class="meta-dot">•</span>
+                  <span class="meta-item">
+                    <span class="material-symbols-outlined">group</span>
+                    {{ profileForm.get('companySize')?.value || '500+ Employees' }}
+                  </span>
+                  <span class="meta-dot" *ngIf="profileForm.get('website')?.value">•</span>
+                  <a [href]="'https://' + profileForm.get('website')?.value" target="_blank" class="meta-item meta-link" *ngIf="profileForm.get('website')?.value">
+                    <span class="material-symbols-outlined">language</span>
+                    {{ profileForm.get('website')?.value }}
+                  </a>
+                </div>
+
+                <div class="badges-row">
                   <span class="plan-badge" *ngIf="activePlan">{{ activePlan }}</span>
-                  <span class="hire-badge verified">Verified Company</span>
+                  <span class="hire-badge verified">
+                    <span class="material-symbols-outlined">verified</span> Verified Company
+                  </span>
                 </div>
               </div>
+
               <div class="hero-actions">
                 <button class="btn-primary-gradient" (click)="toggleEdit()">
                   <span class="material-symbols-outlined">{{ isEditing ? 'visibility' : 'edit' }}</span>
                   {{ isEditing ? 'View Portfolio' : 'Edit Company' }}
                 </button>
-                <a [href]="'https://' + profileForm.get('website')?.value" target="_blank" class="btn-icon-outline" *ngIf="profileForm.get('website')?.value">
+                <a [href]="'https://' + profileForm.get('website')?.value" target="_blank" class="btn-icon-outline with-text" *ngIf="profileForm.get('website')?.value">
                   <span class="material-symbols-outlined">language</span>
+                  View Website
                 </a>
               </div>
             </div>
-            <p class="role-desc">
-              <span class="material-symbols-outlined">location_on</span> 
-              {{ profileForm.get('industry')?.value || 'Industry not set' }} • {{ profileForm.get('companySize')?.value || 'Size not set' }}
-            </p>
           </div>
         </div>
       </section>
@@ -99,7 +130,10 @@
               <span class="material-symbols-outlined">business_center</span>
               <h3>About the Company</h3>
             </div>
-            <p class="summary-p">
+            <p class="summary-p" *ngIf="profileForm.get('summary')?.value">
+              {{ profileForm.get('summary')?.value }}
+            </p>
+            <p class="summary-p" *ngIf="!profileForm.get('summary')?.value">
               {{ profileForm.get('companyName')?.value }} is a leading player in the {{ profileForm.get('industry')?.value }} sector. 
               We are committed to building high-quality products and fostering a great work environment.
             </p>
@@ -227,6 +261,15 @@
                 <input type="text" formControlName="website" placeholder="www.company.com">
               </div>
             </div>
+          </div>
+
+          <!-- Section: Company Summary -->
+          <div class="edit-card">
+            <div class="e-header">
+              <span class="material-symbols-outlined">description</span>
+              <h3>About the Company</h3>
+            </div>
+            <textarea formControlName="summary" placeholder="Describe your company, culture, and what you're looking for in candidates..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px;"></textarea>
           </div>
 
           <!-- Actions -->

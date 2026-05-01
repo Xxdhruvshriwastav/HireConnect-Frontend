@@ -54,7 +54,10 @@ export class RecruiterProfileComponent implements OnInit {
       companyName: ['', Validators.required],
       companySize: [''],
       industry: [''],
-      website: ['']
+      website: [''],
+      profilePictureUrl: [''],
+      coverPictureUrl: [''],
+      summary: ['']
     });
 
     this.loadProfile();
@@ -95,7 +98,10 @@ export class RecruiterProfileComponent implements OnInit {
           companyName: profile.companyName,
           companySize: profile.companySize,
           industry: profile.industry,
-          website: profile.website
+          website: profile.website,
+          profilePictureUrl: profile.profilePictureUrl || '',
+          coverPictureUrl: profile.coverPictureUrl || '',
+          summary: profile.summary || ''
         });
       },
       error: (err) => {
@@ -142,6 +148,51 @@ export class RecruiterProfileComponent implements OnInit {
           console.error('Error updating recruiter profile:', err);
           this.successMessage = '❌ Failed to update profile. Please try again.';
           setTimeout(() => this.successMessage = '', 5000);
+        }
+      });
+    }
+  }
+
+  isPicUploading = false;
+  isCoverUploading = false;
+
+  onProfilePicSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.isPicUploading = true;
+      this.profileService.uploadFile(file).subscribe({
+        next: (res) => {
+          this.profileForm.patchValue({ profilePictureUrl: res.url });
+          this.isPicUploading = false;
+          this.successMessage = 'Profile picture uploaded successfully!';
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.isPicUploading = false;
+          this.successMessage = '❌ Profile picture upload failed.';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
+      });
+    }
+  }
+
+  onCoverPicSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.isCoverUploading = true;
+      this.profileService.uploadFile(file).subscribe({
+        next: (res) => {
+          this.profileForm.patchValue({ coverPictureUrl: res.url });
+          this.isCoverUploading = false;
+          this.successMessage = 'Cover picture uploaded successfully!';
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.isCoverUploading = false;
+          this.successMessage = '❌ Cover picture upload failed.';
+          setTimeout(() => this.successMessage = '', 3000);
         }
       });
     }

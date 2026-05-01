@@ -74,41 +74,45 @@ $sidebar-w: 260px;
 // Hero Section
 .hero-section {
   position: relative; margin-bottom: 4rem;
-  .hero-banner { height: 240px; background: $primary-gradient; border-radius: $radius-xl; }
+  .hero-banner { 
+    height: 240px; background: $primary-gradient; border-radius: $radius-xl; position: relative; overflow: hidden;
+    .cover-img { width: 100%; height: 100%; object-fit: cover; }
+    .cover-cam { position: absolute; top: 15px; right: 15px; width: 44px; height: 44px; background: rgba(0,0,0,0.5); color: $white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(4px); &:hover { background: rgba(0,0,0,0.7); transform: scale(1.05); } }
+  }
   .hero-profile {
     display: flex; align-items: flex-end; gap: 3rem; padding: 0 4rem; margin-top: -100px;
-    @media (max-width: 900px) { flex-direction: column; align-items: center; text-align: center; margin-top: -120px; padding: 0 1rem; }
+    @media (max-width: 900px) { flex-direction: column; align-items: center; text-align: center; margin-top: -120px; padding: 0 1rem; gap: 1.5rem; }
     
     .pic-wrap { 
       position: relative; flex-shrink: 0; z-index: 5;
-      img { width: 220px; height: 220px; border-radius: 2rem; border: 8px solid $white; object-fit: cover; background: $white; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); } 
+      @media (max-width: 900px) { margin-bottom: 1rem; }
+      img { width: 220px; height: 220px; border-radius: 2rem; border: 8px solid $white; object-fit: cover; background: $white; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); @media (max-width: 900px) { width: 180px; height: 180px; } } 
       .cam-overlay { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: $primary; color: $white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid $white; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); } 
     }
 
     .hero-text {
-      flex: 1; padding-bottom: 1rem;
+      flex: 1; padding-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;
+      
       .hero-header-row {
-        display: flex; justify-content: space-between; align-items: center; gap: 2rem; width: 100%;
-        @media (max-width: 900px) { flex-direction: column; align-items: center; gap: 1.5rem; }
-        
-        .name-box {
-          h1 { font-size: 2.8rem; font-weight: 800; color: #1e293b; margin-bottom: 0.75rem; line-height: 1.1; }
-          .badges { 
-            display: flex; gap: 1rem; flex-wrap: wrap; 
-            @media (max-width: 900px) { justify-content: center; }
-          }
-        }
-        
+        display: flex; justify-content: space-between; align-items: flex-start; width: 100%;
+        @media (max-width: 900px) { flex-direction: column; align-items: center; gap: 1rem; }
+        h1 { font-size: 2.8rem; font-weight: 800; color: #1e293b; margin: 0; line-height: 1.1; }
         .hero-actions { display: flex; gap: 1rem; align-items: center; }
       }
       
-      .role-desc { display: flex; align-items: center; gap: 0.5rem; color: $text-dim; font-size: 1.1rem; font-weight: 500; margin-top: 1rem; @media (max-width: 900px) { justify-content: center; } }
+      .role-desc { color: $text-dim; font-size: 1.05rem; font-weight: 500; margin: 0; @media (max-width: 900px) { text-align: center; } }
+      
+      .badges-row {
+        display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-top: 0.25rem;
+        @media (max-width: 900px) { justify-content: center; }
+      }
     }
   }
 }
 
-.plan-badge { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 100px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
-.hire-badge { background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 0.5rem 1.25rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.2); }
+.plan-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: linear-gradient(135deg, #9ca3af 0%, #4b5563 100%); color: white; padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 4px 10px rgba(0,0,0,0.15); .material-symbols-outlined { font-size: 1rem; } }
+.hire-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: #d1fae5; color: #059669; padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.2); .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; } }
+.location-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: $white; color: $text-dim; padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 500; border: 1px solid $border; .material-symbols-outlined { font-size: 1.1rem; } }
 
 // Profile Cards
 .profile-card { 
@@ -116,10 +120,44 @@ $sidebar-w: 260px;
   &:hover { transform: translateY(-4px); box-shadow: 0 12px 30px -10px rgba(0,0,0,0.08); }
   
   .card-title { 
-    display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2.5rem; 
-    .material-symbols-outlined { font-size: 2rem; background: #eef2ff; color: $primary; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; } 
-    h3 { font-size: 1.4rem; font-weight: 800; color: #1e293b; } 
+    display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem; 
+    .material-symbols-outlined { font-size: 1.8rem; background: #eef2ff; color: $primary; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; } 
+    h3 { font-size: 1.4rem; font-weight: 800; color: #1e293b; margin: 0; } 
   } 
+
+  .summary-p { font-size: 1rem; color: #4b5563; line-height: 1.6; margin: 0; }
+
+  .timeline-wrapper {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+
+  .timeline-item {
+    display: flex; gap: 1.5rem; position: relative;
+    &:last-child .timeline-left .timeline-line { display: none; }
+    
+    .timeline-left {
+      display: flex; flex-direction: column; align-items: center; width: 14px; position: relative; margin-top: 6px;
+      .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: $primary; flex-shrink: 0; z-index: 2; box-shadow: 0 0 0 4px #eef2ff; }
+      .timeline-line { width: 2px; background: #e5e7eb; position: absolute; top: 12px; bottom: -30px; left: 5px; z-index: 1; }
+    }
+
+    .timeline-content {
+      flex: 1; padding-bottom: 0.5rem;
+      h4 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0 0 0.25rem; }
+      .company-name { font-size: 0.95rem; font-weight: 500; color: $primary; margin: 0 0 0.5rem; }
+      
+      .meta-row {
+        display: flex; align-items: center; gap: 0.5rem; color: #6b7280; font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;
+        .material-symbols-outlined { font-size: 1rem; }
+        .divider { color: #d1d5db; }
+      }
+
+      .desc-list {
+        margin: 0; padding-left: 1.25rem; color: #4b5563; font-size: 0.9rem; line-height: 1.6;
+        li { margin-bottom: 0.4rem; &::marker { color: #9ca3af; } }
+      }
+    }
+  }
 }
 
 .btn-primary-gradient { 

@@ -50,6 +50,10 @@ export class AuthService {
     return this.http.post<any>(`${this.baseUrl}/register/recruiter`, data);
   }
 
+  register(data: any, role: string) {
+    return this.http.post<any>(`${this.baseUrl}/register?role=${role}`, data);
+  }
+
   isLoggedIn() {
     return !!localStorage.getItem('token');
   }
@@ -65,10 +69,12 @@ export class AuthService {
 
   redirectByRole() {
     const role = localStorage.getItem('role');
+    console.log('Redirecting user with role:', role);
 
-    if (role === 'RECRUITER') {
-      this.router.navigate(['/dashboard']);
-    } else if (role === 'CANDIDATE') {
+    if (role === 'ADMIN') {
+      console.log('Admin detected, forcing redirect to /admin/dashboard');
+      this.router.navigate(['/admin/dashboard']);
+    } else if (role === 'RECRUITER' || role === 'CANDIDATE') {
       this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/auth/login']);

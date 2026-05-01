@@ -22,18 +22,17 @@ export const routes: Routes = [
   },
 
   // 📝 REGISTER
-  {
-    path: 'auth/register/candidate',
-    loadComponent: () =>
-      import('./auth/candidate-register/candidate-register.component')
-        .then(m => m.CandidateRegisterComponent)
+  { 
+    path: 'auth/register/candidate', 
+    loadComponent: () => import('./auth/candidate-register/candidate-register.component').then(m => m.CandidateRegisterComponent) 
   },
-
-  {
-    path: 'auth/register/recruiter',
-    loadComponent: () =>
-      import('./auth/recruiter-register/recruiter-register.component')
-        .then(m => m.RecruiterRegisterComponent)
+  { 
+    path: 'auth/register/recruiter', 
+    loadComponent: () => import('./auth/recruiter-register/recruiter-register.component').then(m => m.RecruiterRegisterComponent) 
+  },
+  { 
+    path: 'auth/register/admin', 
+    loadComponent: () => import('./auth/admin-register/admin-register.component').then(m => m.AdminRegisterComponent) 
   },
 
   // 🎯 DASHBOARD (Protected)
@@ -79,6 +78,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./dashboard/manage-subscription/manage-subscription.component')
         .then(m => m.ManageSubscriptionComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'admin/dashboard',
+    loadComponent: () =>
+      import('./dashboard/admin-dashboard/admin-dashboard.component')
+        .then(m => m.AdminDashboardComponent),
     canActivate: [authGuard]
   }
 ];

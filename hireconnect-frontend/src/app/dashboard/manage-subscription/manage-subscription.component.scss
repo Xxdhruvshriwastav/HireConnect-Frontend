@@ -30,43 +30,7 @@
     }
   }
 
-  .active-status-banner {
-    display: flex;
-    justify-content: space-around;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 2.5rem;
-    border: 1px solid #bfdbfe;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 
-    .status-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-
-      .label {
-        font-size: 0.875rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-        font-weight: 600;
-      }
-
-      .plan-name {
-        font-size: 1.25rem;
-        color: #1e40af;
-        font-weight: 700;
-      }
-
-      .expiry-date {
-        font-size: 1.125rem;
-        color: #334155;
-        font-weight: 600;
-      }
-    }
-  }
 
   .plans-grid {
     display: grid;
@@ -77,30 +41,33 @@
 
   .plan-card {
     background: #ffffff;
-    border: 2px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2.5rem 2rem 2rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     position: relative;
+    display: flex;
+    flex-direction: column;
 
-    &:hover {
-      transform: translateY(-5px);
+    &:hover:not(.active-plan) {
+      transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      border-color: #3b82f6;
+      border-color: #d1d5db;
     }
 
     &.selected {
-      border-color: #2563eb;
-      background-color: #eff6ff;
+      border-color: #3b82f6;
+      background-color: #f8fafc;
       transform: scale(1.02);
     }
 
     &.active-plan {
-      border-color: #10b981;
-      background-color: #f0fdf4;
+      border: 2px solid #10b981;
+      background-color: #f6fdf9;
+      cursor: default;
     }
 
     .current-badge {
@@ -110,60 +77,85 @@
       transform: translate(-50%, -50%);
       background: #10b981;
       color: white;
-      padding: 0.25rem 1rem;
-      border-radius: 20px;
+      padding: 0.35rem 1.25rem;
+      border-radius: 100px;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
 
     h3 {
-      font-size: 1.5rem;
-      color: #1f2937;
+      font-size: 1.4rem;
+      color: #1e293b;
       margin-bottom: 1rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .price {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 1.5rem;
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
 
       .period {
         font-size: 1rem;
-        color: #6b7280;
-        font-weight: 400;
+        color: #64748b;
+        font-weight: 500;
+        margin-top: 1rem;
       }
     }
 
     .features {
       list-style: none;
       padding: 0;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       text-align: left;
+      flex-grow: 1;
 
       li {
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
         color: #4b5563;
         font-size: 0.95rem;
+        font-weight: 500;
+        display: flex;
+        align-items: flex-start;
       }
     }
 
     .select-btn {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.85rem;
       border-radius: 8px;
       border: none;
-      background: #f3f4f6;
-      color: #374151;
-      font-weight: 600;
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
 
       .selected & {
-        background: #2563eb;
+        background: #3b82f6;
         color: white;
+      }
+
+      &:hover:not(:disabled) {
+        background: #e2e8f0;
+        .selected & {
+          background: #2563eb;
+        }
+      }
+
+      &:disabled {
+        background: #f8fafc;
+        color: #64748b;
+        cursor: not-allowed;
       }
     }
   }

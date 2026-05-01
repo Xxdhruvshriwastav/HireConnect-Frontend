@@ -50,6 +50,8 @@ export class CandidateProfileComponent implements OnInit {
       mobile: [''],
       experience: [''],
       resumeUrl: [''],
+      profilePictureUrl: [''],
+      coverPictureUrl: [''],
       summary: [''],
       skills: this.fb.array([]),
       education: this.fb.array([]),
@@ -132,6 +134,8 @@ export class CandidateProfileComponent implements OnInit {
           mobile: profile.mobile,
           experience: profile.experience,
           resumeUrl: profile.resumeUrl,
+          profilePictureUrl: profile.profilePictureUrl || '',
+          coverPictureUrl: profile.coverPictureUrl || '',
           summary: profile.summary || ''
         });
         // Clear then repopulate arrays to avoid duplicates on re-load
@@ -161,16 +165,18 @@ export class CandidateProfileComponent implements OnInit {
   }
 
   isUploading = false;
+  isPicUploading = false;
+  isCoverUploading = false;
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.isUploading = true;
-      this.profileService.uploadResume(file).subscribe({
-        next: (url) => {
-          this.profileForm.patchValue({ resumeUrl: url });
+      this.profileService.uploadFile(file).subscribe({
+        next: (res) => {
+          this.profileForm.patchValue({ resumeUrl: res.url });
           this.isUploading = false;
-          this.successMessage = 'Resume uploaded successfully (simulated)!';
+          this.successMessage = 'Resume uploaded successfully!';
           setTimeout(() => this.successMessage = '', 3000);
         },
         error: (err) => {
@@ -183,8 +189,118 @@ export class CandidateProfileComponent implements OnInit {
     }
   }
 
+  onProfilePicSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.isPicUploading = true;
+      this.profileService.uploadFile(file).subscribe({
+        next: (res) => {
+          const newPicUrl = res.url;
+          this.profileForm.patchValue({ profilePictureUrl: newPicUrl });
+          this.isPicUploading = false;
+
+          // Auto-save the new picture URL to the database immediately
+          const profileData = {
+            ...this.profileForm.getRawValue(),
+            profilePictureUrl: newPicUrl,
+            role: 'CANDIDATE'
+          };
+
+          if (this.isNewProfile) {
+            // If no profile exists yet, create one
+            this.profileService.createCandidateProfile(profileData).subscribe({
+              next: () => {
+                this.isNewProfile = false;
+                this.successMessage = '✅ Profile picture saved!';
+                setTimeout(() => this.successMessage = '', 3000);
+              },
+              error: () => {
+                this.successMessage = 'Picture uploaded to cloud, but save failed. Click Save Profile to persist.';
+                setTimeout(() => this.successMessage = '', 5000);
+              }
+            });
+          } else {
+            this.profileService.updateCandidateProfile(this.email, profileData).subscribe({
+              next: () => {
+                this.successMessage = '✅ Profile picture saved!';
+                setTimeout(() => this.successMessage = '', 3000);
+              },
+              error: () => {
+                this.successMessage = 'Picture uploaded to cloud, but save failed. Click Save Profile to persist.';
+                setTimeout(() => this.successMessage = '', 5000);
+              }
+            });
+          }
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.isPicUploading = false;
+          this.successMessage = '❌ Profile picture upload failed.';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
+      });
+    }
+  }
+
+  onCoverPicSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.isCoverUploading = true;
+      this.profileService.uploadFile(file).subscribe({
+        next: (res) => {
+          const newCoverUrl = res.url;
+          this.profileForm.patchValue({ coverPictureUrl: newCoverUrl });
+          this.isCoverUploading = false;
+
+          const profileData = {
+            ...this.profileForm.getRawValue(),
+            coverPictureUrl: newCoverUrl,
+            role: 'CANDIDATE'
+          };
+
+          if (this.isNewProfile) {
+            this.profileService.createCandidateProfile(profileData).subscribe({
+              next: () => {
+                this.isNewProfile = false;
+                this.successMessage = '✅ Cover picture saved!';
+                setTimeout(() => this.successMessage = '', 3000);
+              },
+              error: () => {
+                this.successMessage = 'Picture uploaded to cloud, but save failed. Click Save Profile to persist.';
+                setTimeout(() => this.successMessage = '', 5000);
+              }
+            });
+          } else {
+            this.profileService.updateCandidateProfile(this.email, profileData).subscribe({
+              next: () => {
+                this.successMessage = '✅ Cover picture saved!';
+                setTimeout(() => this.successMessage = '', 3000);
+              },
+              error: () => {
+                this.successMessage = 'Picture uploaded to cloud, but save failed. Click Save Profile to persist.';
+                setTimeout(() => this.successMessage = '', 5000);
+              }
+            });
+          }
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.isCoverUploading = false;
+          this.successMessage = '❌ Cover picture upload failed.';
+          setTimeout(() => this.successMessage = '', 3000);
+        }
+      });
+    }
+  }
+
   hasEducation(): boolean {
     return this.education.controls.some(control => control.get('degree')?.value || control.get('school')?.value);
+  }
+
+  getBullets(text: string): string[] {
+    if (!text) return [];
+    // Split by newline or period followed by space
+    return text.split(/(?:\r?\n|\.\s+)/).map(s => s.trim()).filter(s => s.length > 0);
   }
 
   onSubmit() {
@@ -230,6 +346,16 @@ export class CandidateProfileComponent implements OnInit {
 
   toggleEdit() {
     this.isEditing = !this.isEditing;
+  }
+
+  getViewUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    return url; // raw PDFs and images both open correctly via direct Cloudinary URL
+  }
+
+  getDownloadUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    return url; // browser handles download natively for raw PDF URLs
   }
 
   logout() {

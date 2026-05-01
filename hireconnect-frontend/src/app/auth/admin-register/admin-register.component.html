@@ -1,0 +1,39 @@
+<div class="auth-wrapper">
+  <section class="form-pane">
+    <header>
+      <div class="logo-wrap" routerLink="/home">
+        <span class="material-symbols-outlined">admin_panel_settings</span>
+        <span>HireConnect Admin</span>
+      </div>
+      <h2>Create Admin Account</h2>
+      <p>Enter your credentials to set up the platform command center.</p>
+    </header>
+
+    <form (ngSubmit)="onSubmit()" #adminForm="ngForm">
+      <div class="form-group">
+        <label for="email">Admin Email</label>
+        <div class="input-wrap">
+          <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="admin@hireconnect.com" required>
+          <span class="icon material-symbols-outlined">alternate_email</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" [(ngModel)]="password" placeholder="••••••••" required>
+          <span class="icon material-symbols-outlined">lock</span>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="loading">
+        {{ loading ? 'Initializing...' : 'Create Admin Access' }}
+        <span class="material-symbols-outlined">shield_person</span>
+      </button>
+
+      <p class="switch-mode">
+        Already have an account? <a routerLink="/auth/login">Log in here</a>
+      </p>
+    </form>
+  </section>
+</div>

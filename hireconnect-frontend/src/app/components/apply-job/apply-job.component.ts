@@ -46,13 +46,13 @@ export class ApplyJobComponent implements OnInit {
     if (file) {
       this.isUploading = true;
       this.uploadMessage = 'Uploading...';
-      this.profileService.uploadResume(file).subscribe({
-        next: (url) => {
-          this.applyForm.patchValue({ resumeUrl: url });
+      this.profileService.uploadFile(file).subscribe({
+        next: (response: { url: string }) => {
+          this.applyForm.patchValue({ resumeUrl: response.url });
           this.isUploading = false;
           this.uploadMessage = '✅ Uploaded!';
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Upload failed', err);
           this.isUploading = false;
           this.uploadMessage = '❌ Failed';

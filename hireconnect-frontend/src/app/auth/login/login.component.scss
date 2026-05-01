@@ -1,4 +1,4 @@
-// Theme Variables
+﻿// Theme Variables
 $primary: #4338ca;
 $primary-hover: #3730a3;
 $bg-light: #f8fafc;
@@ -511,3 +511,7 @@ footer.page-footer {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+.option-icon.admin { background: #fef2f2; color: #ef4444; }
+.admin-option { border-color: #fca5a5 !important; &:hover { background: #fff1f2 !important; } }
+

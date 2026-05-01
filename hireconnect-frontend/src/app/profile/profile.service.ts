@@ -32,10 +32,9 @@ export class ProfileService {
     return this.http.put(`${this.baseUrl}/recruiter/${email}`, profileData);
   }
 
-  uploadResume(file: File): Observable<string> {
-    // Simulate a file upload delay and return a mock URL
-    console.log('Uploading file:', file.name);
-    const mockUrl = `https://hireconnect-storage.s3.amazonaws.com/resumes/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-    return of(mockUrl).pipe(delay(1500));
+  uploadFile(file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ url: string }>(`${this.baseUrl}/upload`, formData);
   }
 }

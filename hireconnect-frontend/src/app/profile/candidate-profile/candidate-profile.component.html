@@ -8,7 +8,7 @@
       </div>
       <div class="user-brief">
         <div class="avatar-box">
-          <img src="/avatar-alex.png" alt="User">
+          <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-alex.png'" alt="User">
         </div>
         <div class="user-meta">
           <span class="u-name">{{ profileForm.get('fullName')?.value || 'New Candidate' }}</span>
@@ -52,7 +52,7 @@
         <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
         <button class="icon-btn"><span class="material-symbols-outlined">mail</span></button>
         <div class="user-toggle" (click)="toggleEdit()">
-          <img src="/avatar-alex.png" alt="User">
+          <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-alex.png'" alt="User">
           <span class="material-symbols-outlined">keyboard_arrow_down</span>
         </div>
       </div>
@@ -60,33 +60,46 @@
 
     <div class="scroll-container">
       <section class="hero-section">
-        <div class="hero-banner"></div>
+        <div class="hero-banner">
+          <img *ngIf="profileForm.get('coverPictureUrl')?.value" [src]="profileForm.get('coverPictureUrl')?.value" alt="Cover Picture" class="cover-img">
+          <div class="cam-overlay cover-cam" *ngIf="isEditing" (click)="coverInput.click()">
+            <span class="material-symbols-outlined">{{ isCoverUploading ? 'sync' : 'add_photo_alternate' }}</span>
+          </div>
+          <input #coverInput type="file" (change)="onCoverPicSelected($event)" accept="image/*" style="display: none;">
+        </div>
         <div class="hero-profile">
-          <div class="pic-wrap">
-            <img src="/avatar-alex.png" alt="Profile">
-            <div class="cam-overlay"><span class="material-symbols-outlined">photo_camera</span></div>
+          <div class="pic-wrap" (click)="isEditing ? picInput.click() : null" [style.cursor]="isEditing ? 'pointer' : 'default'">
+            <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-alex.png'" alt="Profile" [class.uploading]="isPicUploading">
+            <div class="cam-overlay" *ngIf="isEditing">
+              <span class="material-symbols-outlined">{{ isPicUploading ? 'sync' : 'photo_camera' }}</span>
+            </div>
+            <input #picInput type="file" (change)="onProfilePicSelected($event)" accept="image/*" style="display: none;">
           </div>
           <div class="hero-text">
             <div class="hero-header-row">
-              <div class="name-box">
-                <h1>{{ profileForm.get('fullName')?.value || 'Alex Rivera' }}</h1>
-                <div class="badges">
-                  <span class="plan-badge" *ngIf="activePlan">{{ activePlan }}</span>
-                  <span class="hire-badge">Available for hire</span>
-                </div>
-              </div>
+              <h1>{{ profileForm.get('fullName')?.value || 'Ashish' }}</h1>
               <div class="hero-actions">
                 <button class="btn-primary-gradient" (click)="toggleEdit()">
                   <span class="material-symbols-outlined">{{ isEditing ? 'visibility' : 'edit' }}</span>
                   {{ isEditing ? 'View Portfolio' : 'Edit Profile' }}
                 </button>
-                <button class="btn-icon-outline"><span class="material-symbols-outlined">share</span></button>
+                <button class="btn-icon-outline" title="Share Profile"><span class="material-symbols-outlined">share</span></button>
               </div>
             </div>
             <p class="role-desc">
-              <span class="material-symbols-outlined">location_on</span> 
-              {{ profileForm.get('experience')?.value || 'Experience not set' }}
+              {{ profileForm.get('experience')?.value || 'Senior Frontend Engineer · Open to Remote' }}
             </p>
+            <div class="badges-row">
+              <span class="plan-badge" *ngIf="activePlan">
+                <span class="material-symbols-outlined">workspace_premium</span> {{ activePlan }}
+              </span>
+              <span class="hire-badge">
+                <span class="status-dot"></span> Available for hire
+              </span>
+              <span class="location-badge">
+                <span class="material-symbols-outlined">location_on</span> India
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -109,15 +122,24 @@
               <span class="material-symbols-outlined">work</span>
               <h3>Work Experience</h3>
             </div>
-            <div class="list-wrapper" *ngIf="hasWorkExperience(); else noExp">
-              <div class="list-item" *ngFor="let exp of workExperience.controls">
+            <div class="timeline-wrapper" *ngIf="hasWorkExperience(); else noExp">
+              <div class="timeline-item" *ngFor="let exp of workExperience.controls">
                 <ng-container *ngIf="exp.get('title')?.value || exp.get('company')?.value">
-                  <div class="item-icon-box"><span class="material-symbols-outlined">corporate_fare</span></div>
-                  <div class="item-body">
+                  <div class="timeline-left">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                  </div>
+                  <div class="timeline-content">
                     <h4 *ngIf="exp.get('title')?.value">{{ exp.get('title')?.value }}</h4>
-                    <p class="sub-1" *ngIf="exp.get('company')?.value">{{ exp.get('company')?.value }}</p>
-                    <p class="sub-2" *ngIf="exp.get('period')?.value">{{ exp.get('period')?.value }}</p>
-                    <p class="item-desc" *ngIf="exp.get('description')?.value">{{ exp.get('description')?.value }}</p>
+                    <p class="company-name" *ngIf="exp.get('company')?.value">{{ exp.get('company')?.value }}</p>
+                    <div class="meta-row" *ngIf="exp.get('period')?.value">
+                      <span class="material-symbols-outlined">calendar_today</span> {{ exp.get('period')?.value }}
+                      <span class="divider" *ngIf="exp.get('period')?.value">|</span>
+                      <span class="material-symbols-outlined">location_on</span> Remote
+                    </div>
+                    <ul class="desc-list" *ngIf="exp.get('description')?.value">
+                      <li *ngFor="let point of getBullets(exp.get('description')?.value)">{{ point }}</li>
+                    </ul>
                   </div>
                 </ng-container>
               </div>
@@ -135,14 +157,19 @@
               <span class="material-symbols-outlined">school</span>
               <h3>Education</h3>
             </div>
-            <div class="list-wrapper" *ngIf="hasEducation(); else noEdu">
-              <div class="list-item" *ngFor="let edu of education.controls">
+            <div class="timeline-wrapper" *ngIf="hasEducation(); else noEdu">
+              <div class="timeline-item" *ngFor="let edu of education.controls">
                 <ng-container *ngIf="edu.get('degree')?.value || edu.get('school')?.value">
-                  <div class="item-icon-box"><span class="material-symbols-outlined">school</span></div>
-                  <div class="item-body">
+                  <div class="timeline-left">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-line"></div>
+                  </div>
+                  <div class="timeline-content">
                     <h4 *ngIf="edu.get('degree')?.value">{{ edu.get('degree')?.value }}</h4>
-                    <p class="sub-1" *ngIf="edu.get('school')?.value">{{ edu.get('school')?.value }}</p>
-                    <p class="sub-2" *ngIf="edu.get('period')?.value">{{ edu.get('period')?.value }}</p>
+                    <p class="company-name" *ngIf="edu.get('school')?.value">{{ edu.get('school')?.value }}</p>
+                    <div class="meta-row" *ngIf="edu.get('period')?.value">
+                      <span class="material-symbols-outlined">calendar_today</span> {{ edu.get('period')?.value }}
+                    </div>
                     <span class="honor-tag" *ngIf="edu.get('honor')?.value">{{ edu.get('honor')?.value }}</span>
                   </div>
                 </ng-container>
@@ -174,11 +201,27 @@
               <div class="t-inner"><span class="material-symbols-outlined">description</span><h3>Resume Preview</h3></div>
               <button class="small-icon-btn"><span class="material-symbols-outlined">open_in_full</span></button>
             </div>
-            <div class="preview-box">
+            <div class="preview-box" *ngIf="!profileForm.get('resumeUrl')?.value">
               <div class="line-skeleton"></div>
               <div class="line-skeleton short"></div>
               <div class="box-skeleton"></div>
-              <p>Preview not available</p>
+              <p>No resume uploaded yet.</p>
+            </div>
+            <div class="preview-box" *ngIf="profileForm.get('resumeUrl')?.value" style="padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center;">
+              <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--primary);">description</span>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Resume uploaded successfully</p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <a [href]="getViewUrl(profileForm.get('resumeUrl')?.value)" target="_blank" rel="noopener noreferrer"
+                   style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: linear-gradient(135deg,#6366f1,#8b5cf6); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem;">
+                  <span class="material-symbols-outlined" style="font-size: 1rem;">visibility</span>
+                  View Resume
+                </a>
+                <a [href]="getDownloadUrl(profileForm.get('resumeUrl')?.value)" target="_blank" rel="noopener noreferrer"
+                   style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: #1e293b; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; border: 1px solid #334155;">
+                  <span class="material-symbols-outlined" style="font-size: 1rem;">download</span>
+                  Download
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -206,11 +249,11 @@
               </div>
               <div class="field">
                 <label>Mobile Number</label>
-                <input type="text" formControlName="mobile" placeholder="+91 0000000000">
+                <input type="text" formControlName="mobile" placeholder="+91 0000000000" [class.invalid]="profileForm.get('mobile')?.invalid && profileForm.get('mobile')?.touched">
               </div>
               <div class="field">
                 <label>Years of Experience</label>
-                <input type="text" formControlName="experience" placeholder="e.g. 5 Years">
+                <input type="text" formControlName="experience" placeholder="e.g. 5 Years" [class.invalid]="profileForm.get('experience')?.invalid && profileForm.get('experience')?.touched">
               </div>
               <div class="field">
                 <label>Resume (PDF/DOC) *</label>
@@ -220,7 +263,7 @@
                     <span class="material-symbols-outlined">{{ isUploading ? 'sync' : 'upload_file' }}</span>
                     <span>{{ isUploading ? '...' : 'Choose' }}</span>
                   </button>
-                  <input #resumeInput type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" style="display: none;">
+                  <input #resumeInput type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,image/*" style="display: none;">
                 </div>
                 <span class="error-text" *ngIf="profileForm.get('resumeUrl')?.invalid && profileForm.get('resumeUrl')?.touched">Resume link is required</span>
               </div>
@@ -233,7 +276,7 @@
               <span class="material-symbols-outlined">description</span>
               <h3>Professional Summary</h3>
             </div>
-            <textarea formControlName="summary" placeholder="Tell recruiters about your professional journey, key achievements, and career goals..."></textarea>
+            <textarea formControlName="summary" placeholder="Tell recruiters about your professional journey, key achievements, and career goals..." [class.invalid]="profileForm.get('summary')?.invalid && profileForm.get('summary')?.touched"></textarea>
           </div>
 
           <!-- Section: Skills -->
@@ -247,7 +290,7 @@
                 <span class="material-symbols-outlined">add</span>
               </button>
             </div>
-            <div class="skills-edit-list">
+            <div class="skills-edit-list" formArrayName="skills">
               <div *ngFor="let skill of skills.controls; let i=index" class="skill-input-row">
                 <input type="text" [formControlName]="i" placeholder="Enter skill (e.g. Angular)">
                 <button type="button" class="btn-remove-small" (click)="removeSkill(i)">
@@ -277,19 +320,19 @@
                 <div class="input-grid">
                   <div class="field">
                     <label>Job Title</label>
-                    <input type="text" formControlName="title" placeholder="e.g. Senior Developer">
+                    <input type="text" formControlName="title" placeholder="e.g. Senior Developer" [class.invalid]="exp.get('title')?.invalid && exp.get('title')?.touched">
                   </div>
                   <div class="field">
                     <label>Company</label>
-                    <input type="text" formControlName="company" placeholder="e.g. Google">
+                    <input type="text" formControlName="company" placeholder="e.g. Google" [class.invalid]="exp.get('company')?.invalid && exp.get('company')?.touched">
                   </div>
                   <div class="field">
                     <label>Period</label>
-                    <input type="text" formControlName="period" placeholder="e.g. 2021 - Present">
+                    <input type="text" formControlName="period" placeholder="e.g. 2021 - Present" [class.invalid]="exp.get('period')?.invalid && exp.get('period')?.touched">
                   </div>
                   <div class="field full">
                     <label>Responsibilities & Achievements</label>
-                    <input type="text" formControlName="description" placeholder="Short summary of your role...">
+                    <input type="text" formControlName="description" placeholder="Short summary of your role..." [class.invalid]="exp.get('description')?.invalid && exp.get('description')?.touched">
                   </div>
                 </div>
                 <button type="button" class="btn-remove" (click)="removeWorkExperience(i)" title="Remove">
@@ -319,19 +362,19 @@
                 <div class="input-grid">
                   <div class="field">
                     <label>Degree / Certificate</label>
-                    <input type="text" formControlName="degree" placeholder="e.g. B.Tech Computer Science">
+                    <input type="text" formControlName="degree" placeholder="e.g. B.Tech Computer Science" [class.invalid]="edu.get('degree')?.invalid && edu.get('degree')?.touched">
                   </div>
                   <div class="field">
                     <label>School / University</label>
-                    <input type="text" formControlName="school" placeholder="e.g. IIT Delhi">
+                    <input type="text" formControlName="school" placeholder="e.g. IIT Delhi" [class.invalid]="edu.get('school')?.invalid && edu.get('school')?.touched">
                   </div>
                   <div class="field">
                     <label>Period</label>
-                    <input type="text" formControlName="period" placeholder="e.g. 2017 - 2021">
+                    <input type="text" formControlName="period" placeholder="e.g. 2017 - 2021" [class.invalid]="edu.get('period')?.invalid && edu.get('period')?.touched">
                   </div>
                   <div class="field">
                     <label>Honors / Grade</label>
-                    <input type="text" formControlName="honor" placeholder="e.g. Distinction, 9.2 CGPA">
+                    <input type="text" formControlName="honor" placeholder="e.g. Distinction, 9.2 CGPA" [class.invalid]="edu.get('honor')?.invalid && edu.get('honor')?.touched">
                   </div>
                 </div>
                 <button type="button" class="btn-remove" (click)="removeEducation(i)" title="Remove">

@@ -23,6 +23,13 @@
             Title must be at least 5 characters long.
           </span>
         </div>
+        <div class="input-group full">
+          <label>Job Description *</label>
+          <textarea formControlName="description" rows="5" placeholder="Describe the role, responsibilities, and requirements..."></textarea>
+          <span class="error" *ngIf="jobForm.get('description')?.touched && jobForm.get('description')?.invalid">
+            Description must be at least 20 characters long.
+          </span>
+        </div>
         <div class="input-group">
           <label>Category *</label>
           <select formControlName="category">
