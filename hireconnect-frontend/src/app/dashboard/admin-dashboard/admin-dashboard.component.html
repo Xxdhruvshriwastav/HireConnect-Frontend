@@ -20,70 +20,161 @@
     </div>
   </header>
 
-  <div class="stats-grid" *ngIf="!isLoading && stats">
-    <div class="stat-card">
-      <div class="stat-icon jobs">
-        <span class="material-symbols-outlined">work</span>
+  <div class="tabs">
+    <button [class.active]="activeTab === 'analytics'" (click)="setActiveTab('analytics')">Platform Analytics</button>
+    <button [class.active]="activeTab === 'users'" (click)="setActiveTab('users')">Manage Users</button>
+    <button [class.active]="activeTab === 'jobs'" (click)="setActiveTab('jobs')">Manage Jobs</button>
+  </div>
+
+  <div class="tab-content" *ngIf="activeTab === 'analytics'">
+    <div class="stats-grid" *ngIf="!isLoading && stats">
+      <div class="stat-card">
+        <div class="stat-icon jobs">
+          <span class="material-symbols-outlined">work</span>
+        </div>
+        <div class="stat-info">
+          <h3>Total Jobs</h3>
+          <p class="value">{{ stats.totalJobs }}</p>
+        </div>
       </div>
-      <div class="stat-info">
-        <h3>Total Jobs</h3>
-        <p class="value">{{ stats.totalJobs }}</p>
+
+      <div class="stat-card">
+        <div class="stat-icon apps">
+          <span class="material-symbols-outlined">description</span>
+        </div>
+        <div class="stat-info">
+          <h3>Applications</h3>
+          <p class="value">{{ stats.totalApplications }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="stat-info">
+          <h3>Hires / Offers</h3>
+          <p class="value">{{ stats.offeredCount }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon timing">
+          <span class="material-symbols-outlined">timer</span>
+        </div>
+        <div class="stat-info">
+          <h3>Avg. Time to Hire</h3>
+          <p class="value">{{ stats.avgTimeToHireDays }} Days</p>
+        </div>
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon apps">
-        <span class="material-symbols-outlined">description</span>
+    <div class="detailed-stats" *ngIf="!isLoading && stats">
+      <div class="chart-box pipeline-card-admin">
+        <h3>Application Pipeline</h3>
+        <div class="pipeline-viz-container">
+          <div class="pipeline-bar">
+            <div class="bar-segment shortlisted" [style.width.%]="(stats.shortlistedCount / stats.totalApplications) * 100" title="Shortlisted"></div>
+            <div class="bar-segment offered" [style.width.%]="(stats.offeredCount / stats.totalApplications) * 100" title="Offered"></div>
+            <div class="bar-segment rejected" [style.width.%]="(stats.rejectedCount / stats.totalApplications) * 100" title="Rejected"></div>
+          </div>
+          <div class="pipeline-legend">
+            <div class="legend-item">
+              <span class="dot shortlisted"></span>
+              <span class="label">Shortlisted</span>
+              <span class="count">{{ stats.shortlistedCount }}</span>
+            </div>
+            <div class="legend-item">
+              <span class="dot offered"></span>
+              <span class="label">Offered</span>
+              <span class="count">{{ stats.offeredCount }}</span>
+            </div>
+            <div class="legend-item">
+              <span class="dot rejected"></span>
+              <span class="label">Rejected</span>
+              <span class="count">{{ stats.rejectedCount }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="stat-info">
-        <h3>Applications</h3>
-        <p class="value">{{ stats.totalApplications }}</p>
-      </div>
-    </div>
 
-    <div class="stat-card">
-      <div class="stat-icon success">
-        <span class="material-symbols-outlined">check_circle</span>
-      </div>
-      <div class="stat-info">
-        <h3>Hires / Offers</h3>
-        <p class="value">{{ stats.offeredCount }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon timing">
-        <span class="material-symbols-outlined">timer</span>
-      </div>
-      <div class="stat-info">
-        <h3>Avg. Time to Hire</h3>
-        <p class="value">{{ stats.avgTimeToHireDays }} Days</p>
+      <div class="ratio-card">
+        <h3>Efficiency Ratio</h3>
+        <div class="ratio-gauge">
+          <div class="gauge-value">{{ (stats.viewToApplyRatio * 100).toFixed(1) }}%</div>
+          <div class="gauge-label">View-to-Apply</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="detailed-stats" *ngIf="!isLoading && stats">
-    <div class="chart-box">
-      <h3>Application Pipeline</h3>
-      <div class="pipeline-bar">
-        <div class="bar-segment shortlisted" [style.width.%]="(stats.shortlistedCount / stats.totalApplications) * 100">
-          Shortlisted ({{ stats.shortlistedCount }})
-        </div>
-        <div class="bar-segment offered" [style.width.%]="(stats.offeredCount / stats.totalApplications) * 100">
-          Offered ({{ stats.offeredCount }})
-        </div>
-        <div class="bar-segment rejected" [style.width.%]="(stats.rejectedCount / stats.totalApplications) * 100">
-          Rejected ({{ stats.rejectedCount }})
-        </div>
-      </div>
+  <div class="tab-content" *ngIf="activeTab === 'users'">
+    <div class="list-container">
+      <h2>All Platform Users</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{ user.userId }}</td>
+            <td>{{ user.email }}</td>
+            <td><span class="badge" [class]="user.role.toLowerCase()">{{ user.role }}</span></td>
+            <td>
+              <span class="status" [class.active]="user.active" [class.suspended]="!user.active">
+                {{ user.active ? 'Active' : 'Suspended' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action edit" style="background: #3b82f6; color: #fff;" (click)="editUser(user)">Edit</button>
+              <button class="btn-action suspend" (click)="suspendUser(user.userId, user.active)">
+                {{ user.active ? 'Suspend' : 'Unsuspend' }}
+              </button>
+              <button class="btn-action delete" (click)="deleteUser(user.userId)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="ratio-card">
-      <h3>Efficiency Ratio</h3>
-      <div class="ratio-gauge">
-        <div class="gauge-value">{{ (stats.viewToApplyRatio * 100).toFixed(1) }}%</div>
-        <div class="gauge-label">View-to-Apply</div>
-      </div>
+  <div class="tab-content" *ngIf="activeTab === 'jobs'">
+    <div class="list-container">
+      <h2>All Platform Jobs</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Company / Recruiter</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let job of jobs">
+            <td>{{ job.jobId }}</td>
+            <td>{{ job.title }}</td>
+            <td>{{ job.postedBy }}</td>
+            <td>{{ job.category }}</td>
+            <td>
+              <span class="status" [class.open]="job.status === 'OPEN'" [class.closed]="job.status !== 'OPEN'">
+                {{ job.status }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-action delete" (click)="deleteJob(job.jobId)">Remove</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

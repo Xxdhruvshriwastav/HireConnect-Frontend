@@ -82,6 +82,7 @@ export class ManageSubscriptionComponent implements OnInit {
 
   selectPlan(plan: Plan) {
     this.selectedPlan = plan;
+    this.message = '';
   }
 
   payNow() {

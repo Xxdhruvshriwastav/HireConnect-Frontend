@@ -40,13 +40,8 @@
   <!-- Main Content -->
   <div class="main-content">
     <header class="top-nav">
-      <div class="search-bar">
-        <span class="material-symbols-outlined">search</span>
-        <input type="text" placeholder="Search candidates..." (keyup)="onGlobalSearch($event)">
-      </div>
+      <div class="header-left-spacer"></div>
       <div class="nav-right">
-        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-        <button class="icon-btn"><span class="material-symbols-outlined">mail</span></button>
         <div class="user-toggle" (click)="toggleEdit()">
           <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-recruiter.png'" alt="User">
           <span class="material-symbols-outlined">keyboard_arrow_down</span>

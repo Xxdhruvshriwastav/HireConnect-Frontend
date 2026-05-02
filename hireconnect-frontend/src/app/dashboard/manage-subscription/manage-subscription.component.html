@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div class="checkout-section" *ngIf="selectedPlan && selectedPlan.price > 0">
+  <div class="checkout-section" *ngIf="selectedPlan && selectedPlan.price > 0 && activeSubscription?.plan !== selectedPlan.id">
     <h3>Checkout - {{ selectedPlan.name }}</h3>
     
     <div class="payment-mode">

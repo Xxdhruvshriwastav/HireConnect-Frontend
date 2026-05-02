@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
@@ -81,7 +81,8 @@ export class DashboardComponent implements OnInit {
   get greeting(): string {
     if (this.userEmail) {
       const namePart = this.userEmail.split('@')[0].split(/[._]/)[0];
-      const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      let capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      if (capitalized.length > 15) capitalized = capitalized.substring(0, 12) + '...';
       return `Welcome back, ${capitalized}`;
     }
     return 'Welcome back';
@@ -186,6 +187,16 @@ export class DashboardComponent implements OnInit {
     this.loadNotifications();
     this.fetchActiveSubscription();
 
+    // ✅ KEY FIX: Reload jobs every time the user navigates back to the dashboard
+    // This fixes the issue where jobs posted via post-job form didn't appear
+    // because Angular reuses the component instance and does not call ngOnInit again.
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.urlAfterRedirects.startsWith('/dashboard')) {
+        console.log('Dashboard navigated to — refreshing jobs...');
+        this.loadJobs();
+      }
+    });
+
     this.route.queryParams.subscribe(params => {
       if (params['q']) {
         this.searchQuery = params['q'];
@@ -202,6 +213,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  refreshJobs() {
+    this.loadJobs();
+  }
+
   loadJobs() {
     this.isLoading = true;
     // If user is CANDIDATE or GUEST (no role), show all jobs
@@ -209,8 +224,10 @@ export class DashboardComponent implements OnInit {
       this.jobService.getAllJobs().subscribe({
         next: (data) => {
           this.jobs = data;
-          // Extract unique categories and locations for filter dropdowns
-          this.categories = [...new Set(data.map(j => j.category).filter(Boolean))];
+          // Extract unique categories and combine with common ones for better UI
+          const commonCategories = ['Engineering', 'Sales', 'Marketing', 'Product', 'Design', 'HR', 'Finance', 'Customer Support'];
+          const dynamicCategories = data.map(j => j.category).filter(Boolean);
+          this.categories = [...new Set([...commonCategories, ...dynamicCategories])].sort();
           this.locations = [...new Set(data.map(j => j.location).filter(Boolean))];
           this.applyFilters();
           this.isLoading = false;
@@ -220,18 +237,24 @@ export class DashboardComponent implements OnInit {
           this.isLoading = false;
         }
       });
-    } else if (this.role === 'RECRUITER' && this.userEmail) {
-      this.jobService.getJobsByRecruiter(this.userEmail).subscribe({
-        next: (data) => {
-          this.myJobs = data;
-          this.applyFilters();
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error fetching my jobs', err);
-          this.isLoading = false;
-        }
-      });
+    } else if (this.role === 'RECRUITER') {
+      if (this.userEmail) {
+        this.jobService.getJobsByRecruiter(this.userEmail).subscribe({
+          next: (data) => {
+            console.log(`Successfully fetched ${data.length} jobs for recruiter: ${this.userEmail}`);
+            this.myJobs = data;
+            this.applyFilters();
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Error fetching my jobs', err);
+            this.isLoading = false;
+          }
+        });
+      } else {
+        console.warn('Recruiter email is missing from session');
+        this.isLoading = false;
+      }
     }
   }
 
@@ -259,6 +282,11 @@ export class DashboardComponent implements OnInit {
     } else if (this.role === 'RECRUITER') {
       this.router.navigate(['/recruiter/profile']);
     }
+  }
+
+  selectCategory(cat: string) {
+    this.filterCategory = cat;
+    this.applyFilters();
   }
 
   // ---- SEARCH ----
@@ -296,9 +324,9 @@ export class DashboardComponent implements OnInit {
     } else if (this.role === 'RECRUITER') {
       this.filteredMyJobs = this.myJobs.filter(job => {
         const matchesSearch = !q ||
-          job.title.toLowerCase().includes(q) ||
-          job.location.toLowerCase().includes(q) ||
-          job.category.toLowerCase().includes(q);
+          (job.title && job.title.toLowerCase().includes(q)) ||
+          (job.location && job.location.toLowerCase().includes(q)) ||
+          (job.category && job.category.toLowerCase().includes(q));
         
         const matchesType = !this.filterType || (job.type && job.type.toLowerCase() === this.filterType.toLowerCase());
         return matchesSearch && matchesType;

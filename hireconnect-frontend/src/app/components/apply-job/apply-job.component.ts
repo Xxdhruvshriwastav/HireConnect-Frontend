@@ -71,7 +71,8 @@ export class ApplyJobComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error submitting application', err);
-          alert(err.error?.message || 'Failed to submit application. You might have already applied.');
+          const errorMsg = err.error?.message || (typeof err.error === 'string' ? err.error : null) || 'Failed to submit application. You might have already applied.';
+          alert(errorMsg);
           this.isSubmitting = false;
         }
       });

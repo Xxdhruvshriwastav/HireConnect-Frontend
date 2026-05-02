@@ -44,13 +44,8 @@
   <!-- Main Content -->
   <div class="main-content">
     <header class="top-nav">
-      <div class="search-bar">
-        <span class="material-symbols-outlined">search</span>
-        <input type="text" placeholder="Search jobs..." (keyup)="onGlobalSearch($event)">
-      </div>
+      <div class="header-left-spacer"></div>
       <div class="nav-right">
-        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-        <button class="icon-btn"><span class="material-symbols-outlined">mail</span></button>
         <div class="user-toggle" (click)="toggleEdit()">
           <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-alex.png'" alt="User">
           <span class="material-symbols-outlined">keyboard_arrow_down</span>
@@ -67,7 +62,8 @@
           </div>
           <input #coverInput type="file" (change)="onCoverPicSelected($event)" accept="image/*" style="display: none;">
         </div>
-        <div class="hero-profile">
+        <!-- Profile picture overlaps the banner, text is below -->
+        <div class="hero-pic-row">
           <div class="pic-wrap" (click)="isEditing ? picInput.click() : null" [style.cursor]="isEditing ? 'pointer' : 'default'">
             <img [src]="profileForm.get('profilePictureUrl')?.value || '/avatar-alex.png'" alt="Profile" [class.uploading]="isPicUploading">
             <div class="cam-overlay" *ngIf="isEditing">
@@ -75,31 +71,30 @@
             </div>
             <input #picInput type="file" (change)="onProfilePicSelected($event)" accept="image/*" style="display: none;">
           </div>
-          <div class="hero-text">
-            <div class="hero-header-row">
-              <h1>{{ profileForm.get('fullName')?.value || 'Ashish' }}</h1>
-              <div class="hero-actions">
-                <button class="btn-primary-gradient" (click)="toggleEdit()">
-                  <span class="material-symbols-outlined">{{ isEditing ? 'visibility' : 'edit' }}</span>
-                  {{ isEditing ? 'View Portfolio' : 'Edit Profile' }}
-                </button>
-                <button class="btn-icon-outline" title="Share Profile"><span class="material-symbols-outlined">share</span></button>
-              </div>
+        </div>
+        <div class="hero-text">
+          <div class="hero-header-row">
+            <div class="name-role">
+              <h1>{{ profileForm.get('fullName')?.value || 'Your Name' }}</h1>
+              <p class="role-desc">{{ profileForm.get('experience')?.value || 'Senior Frontend Engineer · Open to Remote' }}</p>
             </div>
-            <p class="role-desc">
-              {{ profileForm.get('experience')?.value || 'Senior Frontend Engineer · Open to Remote' }}
-            </p>
-            <div class="badges-row">
-              <span class="plan-badge" *ngIf="activePlan">
-                <span class="material-symbols-outlined">workspace_premium</span> {{ activePlan }}
-              </span>
-              <span class="hire-badge">
-                <span class="status-dot"></span> Available for hire
-              </span>
-              <span class="location-badge">
-                <span class="material-symbols-outlined">location_on</span> India
-              </span>
+            <div class="hero-actions">
+              <button class="btn-primary-gradient" (click)="toggleEdit()">
+                <span class="material-symbols-outlined">{{ isEditing ? 'visibility' : 'edit' }}</span>
+                {{ isEditing ? 'View Portfolio' : 'Edit Profile' }}
+              </button>
             </div>
+          </div>
+          <div class="badges-row">
+            <span class="plan-badge" *ngIf="activePlan">
+              <span class="material-symbols-outlined">workspace_premium</span> {{ activePlan }}
+            </span>
+            <span class="hire-badge">
+              <span class="status-dot"></span> Available for hire
+            </span>
+            <span class="location-badge">
+              <span class="material-symbols-outlined">location_on</span> India
+            </span>
           </div>
         </div>
       </section>

@@ -17,7 +17,7 @@
         <div class="user-info">
           <p class="user-name">{{ userProfile?.fullName || (userEmail ? (userEmail.split('@')[0] | titlecase) : (role === 'RECRUITER' ? 'Recruiter' : 'Candidate')) }}</p>
           <div class="role-plan">
-            <p class="user-role">{{ role === 'RECRUITER' ? 'Recruiter' : 'Job Seeker' }}</p>
+            <p class="user-role">{{ role === 'RECRUITER' ? 'Recruiter' : (role === 'ADMIN' ? 'Administrator' : 'Job Seeker') }}</p>
             <span class="u-plan-badge" *ngIf="activePlan" [ngClass]="{'pro': activePlan === 'CANDIDATE_PRO'}">{{ activePlan.replace('_', ' ') }}</span>
           </div>
         </div>
@@ -41,7 +41,7 @@
         </a>
 
 
-        <a (click)="goToProfile()" class="nav-item" *ngIf="role">
+        <a (click)="goToProfile()" class="nav-item" *ngIf="role && role !== 'ADMIN'">
           <span class="material-symbols-outlined">account_circle</span>
           <span class="nav-label">My Portfolio</span>
         </a>
@@ -111,6 +111,9 @@
 
       <!-- ═══ FILTER PANEL ═══ -->
       <div class="filter-panel" *ngIf="isFilterOpen">
+        <button class="btn-close-panel" (click)="toggleFilterPanel()" title="Close Filters">
+          <span class="material-symbols-outlined">close</span>
+        </button>
         <div class="filter-panel-inner">
           <div class="filter-group" *ngIf="role === 'CANDIDATE' || !role">
             <label>Category</label>
@@ -141,12 +144,12 @@
             </select>
           </div>
           <div class="filter-group" *ngIf="role === 'CANDIDATE' || !role">
-            <label>Min Salary (₹)</label>
-            <input type="number" [(ngModel)]="filterMinSalary" (change)="applyFilters()" placeholder="e.g. 500000">
-          </div>
-          <div class="filter-group" *ngIf="role === 'CANDIDATE' || !role">
-            <label>Max Salary (₹)</label>
-            <input type="number" [(ngModel)]="filterMaxSalary" (change)="applyFilters()" placeholder="e.g. 2000000">
+            <label>Salary Range (Min - Max)</label>
+            <div class="salary-input-wrapper">
+              <input type="number" [(ngModel)]="filterMinSalary" (input)="applyFilters()" placeholder="Min (L)">
+              <span> - </span>
+              <input type="number" [(ngModel)]="filterMaxSalary" (input)="applyFilters()" placeholder="Max (L)">
+            </div>
           </div>
         </div>
         <div class="filter-results-count" *ngIf="role === 'CANDIDATE' || !role">
@@ -171,41 +174,11 @@
           </button>
         </div>
 
-        <!-- FIXED Notification Panel (Only for logged in) -->
-        <div class="notif-panel-fixed" *ngIf="isNotifPanelOpen && role">
-          <!-- ... existing notif content ... -->
-          <div class="notif-panel-backdrop" (click)="toggleNotifPanel()"></div>
-          <div class="notif-panel-content">
-            <div class="notif-panel-header">
-              <h3>Notifications</h3>
-              <button class="btn-text" (click)="markAllAsRead()">Mark all as read</button>
-            </div>
-            <div class="notif-list">
-              <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.isRead" (click)="markAsRead(n.notificationId)">
-                <div class="notif-icon" [ngClass]="n.type.toLowerCase() || 'info'">
-                  <span class="material-symbols-outlined">
-                    {{ n.type === 'EMAIL' ? 'mail' : (n.type === 'ALERT' ? 'warning' : 'info') }}
-                  </span>
-                </div>
-                <div class="notif-body">
-                  <p class="notif-message">{{ n.message }}</p>
-                  <span class="notif-time">{{ n.createdAt | date:'short' }}</span>
-                </div>
-                <button class="btn-delete-notif" (click)="deleteNotification(n.notificationId, $event)" title="Delete Notification">
-                  <span class="material-symbols-outlined">close</span>
-                </button>
-              </div>
-              <div class="notif-empty" *ngIf="notifications.length === 0">
-                <span class="material-symbols-outlined">notifications_off</span>
-                <p>You have no new notifications.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         
         
-        <div class="user-mini-profile" (click)="goToProfile()" *ngIf="role">
+        <div class="user-mini-profile" (click)="goToProfile()" *ngIf="role && role !== 'ADMIN'">
           <span class="material-symbols-outlined">account_circle</span>
         </div>
 
@@ -226,10 +199,16 @@
       <section id="jobs-section" class="active-postings-section" *ngIf="filteredMyJobs.length > 0">
         <div class="section-header">
           <h2>My Active Postings</h2>
-          <button class="btn-post-job-small" (click)="goToPostJob()">
-            <span class="material-symbols-outlined">add</span>
-            Post New
-          </button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-post-job-small" (click)="refreshJobs()" title="Refresh job list" style="background: transparent; border: 1px solid var(--border-color, #e2e8f0);">
+              <span class="material-symbols-outlined">refresh</span>
+              Refresh
+            </button>
+            <button class="btn-post-job-small" (click)="goToPostJob()">
+              <span class="material-symbols-outlined">add</span>
+              Post New
+            </button>
+          </div>
         </div>
         <div class="postings-grid">
           <div class="posting-card" *ngFor="let job of filteredMyJobs">
@@ -260,6 +239,16 @@
         <h2>No job postings yet</h2>
         <p>Start by creating your first opportunity to reach top talent.</p>
         <button class="btn-primary" (click)="goToPostJob()">Create Job Post</button>
+      </section>
+
+      <!-- No Results Found for Recruiter (When filters are active) -->
+      <section class="empty-state" *ngIf="myJobs.length > 0 && filteredMyJobs.length === 0 && !isLoading">
+        <div class="empty-icon">
+          <span class="material-symbols-outlined">search_off</span>
+        </div>
+        <h2>No results found</h2>
+        <p>No jobs match your current search or filter criteria.</p>
+        <button class="btn-outline" (click)="clearFilters()">Clear All Filters</button>
       </section>
 
       <!-- Selection Context -->
@@ -326,10 +315,10 @@
           </div>
           
           <!-- Interview Cards -->
-          <div class="interview-box" *ngFor="let entry of recruiterInterviews | keyvalue" style="margin: 0; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div class="interview-header" style="display: flex; justify-content: space-between;">
+          <div class="interview-box" *ngFor="let entry of recruiterInterviews | keyvalue">
+            <div class="interview-header" style="display: flex; justify-content: space-between; align-items: center;">
               <strong>App ID: {{ entry.value.applicationId }}</strong>
-              <span class="status-pill" [ngClass]="entry.value.status?.toLowerCase() || ''" style="font-size: 0.65rem;">{{ entry.value.status }}</span>
+              <span class="app-status-pill" [ngClass]="entry.value.status?.toLowerCase() || ''">{{ entry.value.status }}</span>
             </div>
             <div class="interview-info">
               <span><span class="material-symbols-outlined">calendar_today</span> {{ entry.value.scheduledAt | date:'medium' }}</span>
@@ -511,49 +500,59 @@
       <!-- Application Pipeline (Dynamic) -->
       <section class="pipeline-section" *ngIf="myApplications.length > 0">
         <div class="section-title-row">
-          <h2>My Applications</h2>
+          <h2>My Applications <span class="app-count-badge">{{ myApplications.length }}</span></h2>
           <a href="#" class="view-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
         </div>
         <div class="pipeline-cards">
           <div class="pipeline-card" *ngFor="let app of myApplications" [ngClass]="'status-' + (app.status?.toLowerCase() || 'default')">
+
+            <!-- Top row: logo + job id + status badge -->
             <div class="pcard-header">
-              <div class="company-logo hireconnect">H</div>
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <div class="company-logo hireconnect">H</div>
+                <div>
+                  <h3>Job #{{ app.jobId }}</h3>
+                  <p class="company-name">Applied {{ app.appliedAt | date:'mediumDate' }}</p>
+                </div>
+              </div>
               <span class="app-status-pill" [ngClass]="app.status?.toLowerCase() || ''">{{ app.status }}</span>
             </div>
-            <h3>Job ID: {{ app.jobId }}</h3>
-            <p class="company-name">Applied on {{ app.appliedAt | date:'mediumDate' }}</p>
-            <div class="pcard-meta">
-              <span><span class="material-symbols-outlined">info</span> Status: {{ app.status }}</span>
-              <span><span class="material-symbols-outlined">schedule</span> Updated {{ app.appliedAt | date:'short' }}</span>
-            </div>
-            
-            <!-- Interview Details -->
+
+            <!-- Interview Details (compact) -->
             <div class="interview-box" *ngIf="app.applicationId && candidateInterviews[app.applicationId]">
               <div class="interview-header">
                 <strong>Interview {{ candidateInterviews[app.applicationId].status }}</strong>
               </div>
               <div class="interview-info">
-                <span><span class="material-symbols-outlined">calendar_today</span> {{ candidateInterviews[app.applicationId].scheduledAt | date:'medium' }}</span>
+                <span><span class="material-symbols-outlined">calendar_today</span> {{ candidateInterviews[app.applicationId].scheduledAt | date:'medShort' }}</span>
                 <span><span class="material-symbols-outlined">videocam</span> {{ candidateInterviews[app.applicationId].mode }}</span>
                 <span *ngIf="candidateInterviews[app.applicationId].meetLink"><span class="material-symbols-outlined">link</span> <a [href]="candidateInterviews[app.applicationId].meetLink" target="_blank">Join Link</a></span>
               </div>
-              <button class="btn-action-primary" *ngIf="candidateInterviews[app.applicationId].status === 'SCHEDULED'" (click)="confirmInterview(candidateInterviews[app.applicationId].interviewId)">
+              <button class="btn-action-primary" *ngIf="candidateInterviews[app.applicationId].status === 'SCHEDULED'" (click)="confirmInterview(candidateInterviews[app.applicationId].interviewId)" style="margin-top:0.5rem; font-size:0.75rem; padding:0.3rem 0.75rem;">
                 Confirm Attendance
               </button>
             </div>
-            
+
+            <!-- Progress bar -->
             <div class="pcard-footer">
               <div class="progress-bar">
                 <div class="progress-fill" [style.width]="app.status === 'APPLIED' ? '20%' : (app.status === 'SHORTLISTED' ? '50%' : (app.status === 'INTERVIEW_SCHEDULED' ? '80%' : '100%'))"></div>
               </div>
-              <span class="progress-label">{{ app.status }}</span>
+              <div class="progress-label">
+                <span>{{ app.status }}</span>
+                <span>{{ app.status === 'APPLIED' ? '20%' : (app.status === 'SHORTLISTED' ? '50%' : (app.status === 'INTERVIEW_SCHEDULED' ? '80%' : '100%')) }}</span>
+              </div>
             </div>
+
+            <!-- Withdraw -->
             <div class="pcard-actions">
-              <button class="btn-withdraw" (click)="withdrawApplication(app.applicationId)">Withdraw Application</button>
+              <button class="btn-withdraw" (click)="withdrawApplication(app.applicationId)">Withdraw</button>
             </div>
+
           </div>
         </div>
       </section>
+
 
       <section class="empty-state-small" *ngIf="myApplications.length === 0">
         <p>You haven't applied for any jobs yet. Start exploring!</p>
@@ -566,6 +565,17 @@
           <a href="#" class="view-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
         </div>
         
+        <div class="category-chips-container" *ngIf="(role === 'CANDIDATE' || !role) && categories.length > 0">
+          <button class="chip-item" [class.active]="filterCategory === ''" (click)="selectCategory('')">
+            All Roles
+          </button>
+          <button class="chip-item" *ngFor="let cat of categories" 
+                  [class.active]="filterCategory === cat" 
+                  (click)="selectCategory(cat)">
+            {{ cat }}
+          </button>
+        </div>
+
         <div class="job-list" *ngIf="filteredJobs.length > 0">
           <div class="job-card" *ngFor="let job of displayedJobs">
             <div class="card-top">
@@ -656,16 +666,61 @@
 
     <!-- Footer -->
     <footer class="main-footer">
-      <div class="footer-brand">
-        <span class="brand-name">HireConnect</span>
-        <p class="copyright">© 2024 HireConnect. Precision in every hire.</p>
+      <div class="footer-content-centered">
+        <div class="footer-brand">
+          <span class="brand-name">HireConnect</span>
+          <p class="copyright">© 2026 HireConnect. Precision in every hire.</p>
+        </div>
+        <nav class="footer-links-centered">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookies</a>
+          <a href="#">Accessibility</a>
+        </nav>
       </div>
-      <nav class="footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Cookies</a>
-        <a href="#">Accessibility</a>
-      </nav>
     </footer>
   </main>
 </div>
+
+<!-- FIXED Notification Panel (Only for logged in) -->
+<div class="notif-panel-fixed" *ngIf="isNotifPanelOpen && role">
+  <div class="notif-panel-backdrop" (click)="toggleNotifPanel()"></div>
+  <div class="notif-panel-content">
+    <div class="notif-panel-header">
+      <div class="header-title">
+        <span class="material-symbols-outlined">notifications_active</span>
+        <h3>Notifications</h3>
+      </div>
+      <div class="header-actions">
+        <button class="btn-text" (click)="markAllAsRead()">Mark all as read</button>
+        <button class="btn-icon-close" (click)="toggleNotifPanel()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item" *ngFor="let n of notifications" [class.unread]="!n.isRead" (click)="markAsRead(n.notificationId)">
+        <div class="notif-icon" [ngClass]="n.type.toLowerCase() || 'info'">
+          <span class="material-symbols-outlined">
+            {{ n.type === 'EMAIL' ? 'mail' : (n.type === 'ALERT' ? 'warning' : 'info') }}
+          </span>
+        </div>
+        <div class="notif-body">
+          <p class="notif-message">{{ n.message }}</p>
+          <span class="notif-time">{{ n.createdAt | date:'short' }}</span>
+        </div>
+        <button class="btn-delete-notif" (click)="deleteNotification(n.notificationId, $event)" title="Delete Notification">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+      <div class="notif-empty" *ngIf="notifications.length === 0">
+        <div class="empty-notif-state">
+          <span class="material-symbols-outlined">notifications_off</span>
+          <p>You're all caught up!</p>
+          <span class="empty-sub">No new notifications at the moment.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

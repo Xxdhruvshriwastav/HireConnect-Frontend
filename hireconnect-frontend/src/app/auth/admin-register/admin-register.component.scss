@@ -1,8 +1,8 @@
-$primary: #ef4444; $primary-hover: #dc2626; $text-dark: #0f172a; $text-muted: #64748b; $border-color: #e2e8f0; $white: #ffffff;
+$primary: var(--error); $primary-hover: var(--error); $text-dark: var(--text-primary); $text-muted: var(--text-muted); $border-color: var(--border-strong); $white: var(--bg-surface);
 
-:host { display: block; min-height: 100vh; background-color: #f1f5f9; font-family: 'Inter', sans-serif; padding: 2rem; }
+:host { display: block; min-height: 100vh; background-color: var(--bg-main); font-family: 'Inter', sans-serif; padding: 2rem; }
 
-.auth-wrapper { max-width: 600px; margin: 4rem auto; background: $white; border-radius: 2.5rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); padding: 3rem; }
+.auth-wrapper { max-width: 600px; margin: 4rem auto; background: $white; border-radius: 2.5rem; overflow: hidden; box-shadow: var(--shadow-md); padding: 3rem; }
 
 header {
   margin-bottom: 2.5rem; text-align: center;
@@ -16,8 +16,8 @@ header {
   label { display: block; font-size: 0.75rem; font-weight: 800; color: $text-dark; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
   .input-wrap {
     position: relative; display: flex; align-items: center;
-    input { width: 100%; height: 3.75rem; background: #f1f5f9; border: 2px solid transparent; border-radius: 1rem; padding: 0 1.5rem; padding-right: 3.5rem; font-weight: 500; font-size: 1rem; transition: all 0.2s; &:focus { outline: none; background: white; border-color: rgba($primary, 0.2); box-shadow: 0 0 0 4px rgba($primary, 0.1); } }
-    .icon { position: absolute; right: 1.25rem; color: #94a3b8; pointer-events: none; font-size: 1.5rem; }
+    input { width: 100%; height: 3.75rem; background: var(--bg-main); border: 2px solid transparent; border-radius: 1rem; padding: 0 1.5rem; padding-right: 3.5rem; font-weight: 500; font-size: 1rem; transition: all 0.2s; &:focus { outline: none; background: white; border-color: rgba($primary, 0.2); box-shadow: 0 0 0 4px rgba($primary, 0.1); } }
+    .icon { position: absolute; right: 1.25rem; color: var(--text-muted); pointer-events: none; font-size: 1.5rem; }
   }
 }
 
