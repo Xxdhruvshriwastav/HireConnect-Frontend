@@ -501,10 +501,11 @@
       <section class="pipeline-section" *ngIf="myApplications.length > 0">
         <div class="section-title-row">
           <h2>My Applications <span class="app-count-badge">{{ myApplications.length }}</span></h2>
-          <a href="#" class="view-all">View all <span class="material-symbols-outlined">arrow_forward</span></a>
+          <a href="javascript:void(0)" class="view-all" *ngIf="myApplications.length > 2 && !showAllApplications" (click)="showAllApplications = true">View all <span class="material-symbols-outlined">arrow_forward</span></a>
+          <a href="javascript:void(0)" class="view-all" *ngIf="showAllApplications" (click)="showAllApplications = false">Show less <span class="material-symbols-outlined">arrow_back</span></a>
         </div>
         <div class="pipeline-cards">
-          <div class="pipeline-card" *ngFor="let app of myApplications" [ngClass]="'status-' + (app.status?.toLowerCase() || 'default')">
+          <div class="pipeline-card" *ngFor="let app of (showAllApplications ? myApplications : myApplications.slice(0, 2))" [ngClass]="'status-' + (app.status?.toLowerCase() || 'default')">
 
             <!-- Top row: logo + job id + status badge -->
             <div class="pcard-header">
@@ -680,6 +681,50 @@
       </div>
     </footer>
   </main>
+
+  <!-- === MOBILE BOTTOM NAV (Phone only) === -->
+  <nav class="mobile-bottom-nav">
+    <div class="mobile-nav-inner">
+      <a routerLink="/home" class="mob-nav-item" [routerLinkActive]="['active']">
+        <span class="material-symbols-outlined">home</span>
+        <span>Home</span>
+      </a>
+      <button class="mob-nav-item" (click)="goToProfile()" *ngIf="role && role !== 'ADMIN'">
+        <span class="material-symbols-outlined">account_circle</span>
+        <span>Portfolio</span>
+      </button>
+      <a routerLink="/dashboard/manage-subscription" class="mob-nav-item" [routerLinkActive]="['active']" *ngIf="role === 'RECRUITER'">
+        <span class="material-symbols-outlined">credit_card</span>
+        <span>Plan</span>
+      </a>
+      <button class="mob-nav-item" (click)="goToPostJob()" *ngIf="role === 'RECRUITER'">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span>Post Job</span>
+      </button>
+      <button class="mob-nav-item" (click)="goToProfile()" *ngIf="role === 'CANDIDATE'">
+        <span class="material-symbols-outlined">edit_document</span>
+        <span>Resume</span>
+      </button>
+      <a routerLink="/admin/dashboard" class="mob-nav-item" [routerLinkActive]="['active']" *ngIf="role === 'ADMIN'">
+        <span class="material-symbols-outlined">analytics</span>
+        <span>Admin</span>
+      </a>
+      <button class="mob-nav-item" (click)="toggleNotifPanel()" *ngIf="role" style="position:relative;">
+        <span class="material-symbols-outlined">notifications</span>
+        <span *ngIf="unreadCount > 0" style="position:absolute;top:2px;right:8px;background:#ef4444;color:#fff;font-size:.5rem;font-weight:800;padding:1px 4px;border-radius:8px;">{{ unreadCount }}</span>
+        <span>Alerts</span>
+      </button>
+      <button class="mob-nav-item" (click)="logout()" *ngIf="role" style="color:#ef4444;">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+      </button>
+      <a routerLink="/auth/login" class="mob-nav-item" *ngIf="!role">
+        <span class="material-symbols-outlined">login</span>
+        <span>Login</span>
+      </a>
+    </div>
+  </nav>
+
 </div>
 
 <!-- FIXED Notification Panel (Only for logged in) -->

@@ -43,6 +43,8 @@ export class DashboardComponent implements OnInit {
   isNotifPanelOpen = false;
   activePlan = '';
 
+  showAllApplications = false;
+
   // Search & Filter state
   searchQuery = '';
   filteredJobs: Job[] = [];

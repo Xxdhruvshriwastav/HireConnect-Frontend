@@ -14,7 +14,8 @@
     </p>
 
     <div class="hero-img-wrap">
-      <img src="/hero-recruiter.png" alt="Professional Recruiter" class="hero-img">
+      <img *ngIf="mode === 'login'" src="/assets/hero-recruiter.png" alt="Professional Recruiter" class="hero-img">
+      <img *ngIf="mode === 'signup'" src="/assets/hero-candidate.png" alt="Professional Candidate" class="hero-img">
     </div>
 
     <div class="trust-badge">
@@ -76,7 +77,6 @@
         <div class="form-group">
           <div class="label-row">
             <label for="password">Password</label>
-            <a href="#" class="forgot-link">Forgot password?</a>
           </div>
           <div class="input-wrap">
             <input 
@@ -137,14 +137,13 @@
           <span class="material-symbols-outlined arrow">chevron_right</span>
         </a>
 
-        <!-- Admin Access (Testing Only) -->
-        <a routerLink="/auth/register/admin" class="option-card admin-option">
-          <div class="option-icon admin">
+        <a routerLink="/auth/register/admin" class="option-card">
+          <div class="option-icon admin" style="background: rgba(43, 43, 43, 0.5); color: #fff;">
             <span class="material-symbols-outlined">admin_panel_settings</span>
           </div>
           <div class="option-info">
-            <h3>Platform Admin</h3>
-            <p>Manage the entire HireConnect ecosystem and view analytics.</p>
+            <h3>Admin</h3>
+            <p>Manage users, monitor platform activity, and oversee operations.</p>
           </div>
           <span class="material-symbols-outlined arrow">chevron_right</span>
         </a>

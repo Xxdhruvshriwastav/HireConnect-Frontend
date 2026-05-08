@@ -5,7 +5,7 @@ export const routes: Routes = [
 
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 
-  // 🏠 HOME (Public Job Browsing)
+  
   {
     path: 'home',
     loadComponent: () =>
@@ -21,7 +21,7 @@ export const routes: Routes = [
         .then(m => m.LoginComponent)
   },
 
-  // 📝 REGISTER
+  
   { 
     path: 'auth/register/candidate', 
     loadComponent: () => import('./auth/candidate-register/candidate-register.component').then(m => m.CandidateRegisterComponent) 
@@ -35,7 +35,7 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/admin-register/admin-register.component').then(m => m.AdminRegisterComponent) 
   },
 
-  // 🎯 DASHBOARD (Protected)
+
   {
     path: 'dashboard',
     loadComponent: () =>
@@ -44,7 +44,7 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  // 👤 PROFILE
+
   {
     path: 'candidate/profile',
     loadComponent: () =>

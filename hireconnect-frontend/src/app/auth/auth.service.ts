@@ -12,7 +12,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // 🔐 LOGIN
+  
   login(email: string, password: string) {
     return this.http.post<any>(`${this.baseUrl}/login`, { email, password })
       .pipe(
@@ -21,8 +21,11 @@ export class AuthService {
         })
       );
   }
+  
 
-  // 🌐 GOOGLE LOGIN
+  
+
+  
   googleLogin(idToken: string) {
     return this.http.post<any>(`${this.baseUrl}/google`, { idToken })
       .pipe(
@@ -41,7 +44,7 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(user));
   }
 
-  // ✅ REGISTER
+  
   registerCandidate(data: any) {
     return this.http.post<any>(`${this.baseUrl}/register/candidate`, data);
   }
